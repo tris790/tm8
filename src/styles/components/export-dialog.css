@@ -1,0 +1,337 @@
+/**
+ * Export Dialog component styles
+ * Modal dialog for export format selection and options
+ */
+
+.export-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.export-dialog {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.export-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.5rem 0;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 1.5rem;
+}
+
+.export-dialog__header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.export-dialog__close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin: -0.5rem;
+  color: #666;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.export-dialog__close:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.export-dialog__close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.export-dialog__content {
+  padding: 0 1.5rem;
+}
+
+.export-dialog__section {
+  margin-bottom: 1.5rem;
+}
+
+.export-dialog__section h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-hint {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.filename-input-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.filename-input-group input {
+  flex: 1;
+  border: none;
+  padding: 0.75rem;
+  font-size: 1rem;
+}
+
+.filename-input-group input:focus {
+  outline: none;
+}
+
+.filename-extension {
+  background: #f5f5f5;
+  padding: 0.75rem;
+  font-size: 1rem;
+  color: #666;
+  border-left: 1px solid #ddd;
+  font-family: monospace;
+}
+
+.export-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.checkbox-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  cursor: pointer;
+  padding: 0.75rem;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.checkbox-option:hover {
+  border-color: #ddd;
+  background: #fafafa;
+}
+
+.checkbox-option input[type="checkbox"] {
+  margin-right: 0.5rem;
+  transform: scale(1.1);
+}
+
+.checkbox-hint {
+  font-size: 0.875rem;
+  color: #666;
+  margin-left: 1.5rem;
+}
+
+.export-info {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.export-info h4 {
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+.export-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+.export-warning {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  padding: 0.75rem;
+  color: #856404;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+.export-dialog__actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 1.5rem;
+  border-top: 1px solid #eee;
+  margin-top: 1.5rem;
+}
+
+.export-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: export-spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes export-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .export-dialog {
+    background: #2d2d2d;
+    color: #fff;
+  }
+
+  .export-dialog__header {
+    border-bottom-color: #444;
+  }
+
+  .export-dialog__header h3 {
+    color: #fff;
+  }
+
+  .export-dialog__close {
+    color: #ccc;
+  }
+
+  .export-dialog__close:hover {
+    background: #444;
+    color: #fff;
+  }
+
+  .export-dialog__section h4 {
+    color: #fff;
+  }
+
+  .form-group label {
+    color: #fff;
+  }
+
+  .form-hint {
+    color: #ccc;
+  }
+
+  .filename-input-group {
+    border-color: #555;
+  }
+
+  .filename-input-group input {
+    background: #3d3d3d;
+    color: #fff;
+  }
+
+  .filename-extension {
+    background: #444;
+    color: #ccc;
+    border-left-color: #555;
+  }
+
+  .checkbox-option {
+    border-color: #444;
+    background: #3d3d3d;
+  }
+
+  .checkbox-option:hover {
+    border-color: #555;
+    background: #444;
+  }
+
+  .checkbox-hint {
+    color: #ccc;
+  }
+
+  .export-info {
+    background: #3d3d3d;
+    border-color: #555;
+  }
+
+  .export-info h4 {
+    color: #fff;
+  }
+
+  .export-info p {
+    color: #ccc;
+  }
+
+  .export-warning {
+    background: #4a3c1d;
+    border-color: #664d00;
+    color: #ffecb3;
+  }
+
+  .export-dialog__actions {
+    border-top-color: #444;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .export-dialog-overlay {
+    padding: 0.5rem;
+  }
+
+  .export-dialog {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+
+  .export-dialog__header {
+    padding: 1rem 1rem 0;
+    margin-bottom: 1rem;
+  }
+
+  .export-dialog__content {
+    padding: 0 1rem;
+  }
+
+  .export-dialog__actions {
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  .export-dialog__actions {
+    flex-direction: column-reverse;
+  }
+
+  .export-dialog__actions button {
+    width: 100%;
+  }
+}

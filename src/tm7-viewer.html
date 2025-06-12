@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TM7 File Viewer2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e293b;
+            color: #e2e8f0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 20px;
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
+            transition: all 0.3s ease;
+        }
+
+        .header.compact {
+            padding: 10px 20px;
+        }
+
+        .upload-area {
+            border: 2px dashed #475569;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area.compact {
+            padding: 12px;
+            border: 1px solid #475569;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-align: left;
+        }
+
+        .upload-area.compact p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .upload-area.compact small {
+            display: none;
+        }
+
+        .upload-area.compact button {
+            padding: 8px 16px !important;
+            font-size: 14px !important;
+            margin: 0 !important;
+        }
+
+        .search-container {
+            padding: 10px 20px;
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
+            display: none;
+        }
+
+        .search-container.visible {
+            display: block;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 8px 12px;
+            background: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .search-results {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .tree-item.highlighted {
+            background: rgba(245, 158, 11, 0.2);
+            border-left: 3px solid #f59e0b;
+        }
+
+        .tree-item.search-match {
+            background: rgba(16, 185, 129, 0.2);
+        }
+
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .upload-area.dragover {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tree-container {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        .tree-node {
+            margin-left: 20px;
+            border-left: 1px solid #334155;
+        }
+
+        .tree-node.root {
+            margin-left: 0;
+            border-left: none;
+        }
+
+        .tree-item {
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+            user-select: none;
+        }
+
+        .tree-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .tree-toggle {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .tree-toggle.empty {
+            width: 16px;
+        }
+
+        .tree-label {
+            font-weight: 500;
+        }
+
+        .tree-tag {
+            color: #3b82f6;
+        }
+
+        .tree-text {
+            color: #10b981;
+            font-style: italic;
+        }
+
+        .tree-attr {
+            color: #f59e0b;
+            margin-left: 8px;
+            font-size: 0.9em;
+        }
+
+        .tree-children {
+            display: none;
+        }
+
+        .tree-children.expanded {
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .stats {
+            padding: 10px 20px;
+            background: #0f172a;
+            border-top: 1px solid #334155;
+            font-size: 0.9em;
+            color: #64748b;
+        }
+
+        .virtual-container {
+            height: 100%;
+            overflow: auto;
+            position: relative;
+        }
+
+        .virtual-content {
+            position: relative;
+        }
+
+        .virtual-item {
+            position: absolute;
+            left: 0;
+            right: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="upload-area" id="uploadArea">
+            <input type="file" id="fileInput" class="file-input" accept=".tm7,.xml">
+            <p>Select a TM7 file to view</p>
+            <button id="importBtn" style="
+                background: #3b82f6;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 6px;
+                font-size: 16px;
+                cursor: pointer;
+                margin-top: 16px;
+                transition: background-color 0.2s;
+            ">Choose File</button>
+            <small style="display: block; margin-top: 8px;">Supports .tm7 and .xml files</small>
+        </div>
+    </div>
+
+    <div class="search-container" id="searchContainer">
+        <input type="text" class="search-box" id="searchBox" placeholder="Search nodes... (fuzzy matching)">
+        <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <div class="content">
+        <div class="tree-container" id="treeContainer">
+            <div class="loading" id="loading" style="display: none;">
+                Parsing file...
+            </div>
+            <div id="treeView"></div>
+        </div>
+        <div class="stats" id="stats" style="display: none;"></div>
+    </div>
+
+    <script>
+        class TM7Viewer {
+            constructor() {
+                this.nodeId = 0;
+                this.flattenedNodes = [];
+                this.visibleNodes = [];
+                this.itemHeight = 28;
+                this.containerHeight = 0;
+                this.scrollTop = 0;
+                this.isVirtualized = false;
+                this.searchMatches = [];
+                this.currentMatchIndex = -1;
+                this.allNodes = [];
+                this.searchTimeout = null;
+
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                const uploadArea = document.getElementById('uploadArea');
+                const fileInput = document.getElementById('fileInput');
+                const importBtn = document.getElementById('importBtn');
+
+                // Button click and upload area click
+                importBtn.addEventListener('click', () => fileInput.click());
+                uploadArea.addEventListener('click', (e) => {
+                    if (e.target !== importBtn) fileInput.click();
+                });
+                fileInput.addEventListener('change', (e) => this.handleFile(e.target.files[0]));
+
+                // Search functionality with debouncing
+                const searchBox = document.getElementById('searchBox');
+                searchBox.addEventListener('input', (e) => {
+                    clearTimeout(this.searchTimeout);
+                    this.searchTimeout = setTimeout(() => {
+                        this.handleSearch(e.target.value);
+                    }, 300); // 300ms delay
+                });
+                searchBox.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        clearTimeout(this.searchTimeout);
+                        this.navigateToNextMatch();
+                    } else if (e.key === 'Escape') {
+                        this.clearSearch();
+                        searchBox.value = '';
+                    }
+                });
+
+                // Button hover effect
+                importBtn.addEventListener('mouseenter', () => {
+                    importBtn.style.backgroundColor = '#2563eb';
+                });
+                importBtn.addEventListener('mouseleave', () => {
+                    importBtn.style.backgroundColor = '#3b82f6';
+                });
+
+                // Comprehensive prevention of default drag behaviors
+                const preventDefaults = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                };
+
+                // Prevent default on all drag events for the entire document
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    document.addEventListener(eventName, preventDefaults, false);
+                    document.body.addEventListener(eventName, preventDefaults, false);
+                    window.addEventListener(eventName, preventDefaults, false);
+                });
+
+                // Handle drag events specifically on upload area
+                uploadArea.addEventListener('dragenter', (e) => {
+                    preventDefaults(e);
+                    uploadArea.classList.add('dragover');
+                });
+
+                uploadArea.addEventListener('dragover', (e) => {
+                    preventDefaults(e);
+                    uploadArea.classList.add('dragover');
+                });
+
+                uploadArea.addEventListener('dragleave', (e) => {
+                    preventDefaults(e);
+                    // Only remove dragover if we're leaving the upload area itself
+                    if (!uploadArea.contains(e.relatedTarget)) {
+                        uploadArea.classList.remove('dragover');
+                    }
+                });
+
+                uploadArea.addEventListener('drop', (e) => {
+                    preventDefaults(e);
+                    uploadArea.classList.remove('dragover');
+
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        this.handleFile(files[0]);
+                    }
+                });
+            }
+
+            async handleFile(file) {
+                if (!file) return;
+
+                const loading = document.getElementById('loading');
+                const treeView = document.getElementById('treeView');
+                const stats = document.getElementById('stats');
+
+                loading.style.display = 'block';
+                treeView.innerHTML = '';
+                stats.style.display = 'none';
+
+                try {
+                    const text = await file.text();
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(text, 'text/xml');
+
+                    if (xmlDoc.documentElement.nodeName === 'parsererror') {
+                        throw new Error('Invalid XML file');
+                    }
+
+                    await this.renderTree(xmlDoc);
+                    this.showStats(xmlDoc, file);
+                    this.makeCompact();
+                } catch (error) {
+                    treeView.innerHTML = `<div style="color: #ef4444; padding: 20px;">Error: ${error.message}</div>`;
+                } finally {
+                    loading.style.display = 'none';
+                }
+            }
+
+            async renderTree(xmlDoc) {
+                const treeView = document.getElementById('treeView');
+                const treeContainer = document.getElementById('treeContainer');
+
+                this.nodeId = 0;
+                this.flattenedNodes = [];
+
+                // Build tree structure
+                this.rootNode = this.createTreeNode(xmlDoc.documentElement, 0);
+                console.log('Root node created:', this.rootNode.element.nodeName);
+                this.flattenTree(this.rootNode);
+                
+                // Cache all nodes for search (build once, search many times)
+                this.allNodes = [];
+                this.flattenAllNodes(this.rootNode, this.allNodes);
+                console.log('Cached', this.allNodes.length, 'nodes for search');
+
+                // Determine if we need virtualization
+                this.isVirtualized = this.flattenedNodes.length > 1000;
+
+                if (this.isVirtualized) {
+                    this.setupVirtualScrolling(treeContainer);
+                } else {
+                    treeView.innerHTML = '';
+                    treeView.appendChild(this.renderNode(this.rootNode));
+                }
+            }
+
+            createTreeNode(element, depth) {
+                const node = {
+                    id: this.nodeId++,
+                    element: element,
+                    depth: depth,
+                    expanded: false,
+                    children: [],
+                    visible: depth === 0 || depth === 1 // Only show root and first level by default
+                };
+
+                // Add children (element nodes only, skip text nodes with just whitespace)
+                for (let child of element.children || []) {
+                    if (child.nodeType === 1) { // Element node
+                        node.children.push(this.createTreeNode(child, depth + 1));
+                    }
+                }
+
+                return node;
+            }
+
+            flattenTree(node, result = []) {
+                result.push(node);
+                if (node.expanded) {
+                    node.children.forEach(child => this.flattenTree(child, result));
+                }
+                return result;
+            }
+
+            setupVirtualScrolling(container) {
+                container.innerHTML = `
+                    <div class="virtual-container" style="height: 100%;">
+                        <div class="virtual-content" id="virtualContent"></div>
+                    </div>
+                `;
+
+                const virtualContainer = container.querySelector('.virtual-container');
+                const virtualContent = document.getElementById('virtualContent');
+
+                this.containerHeight = virtualContainer.clientHeight;
+                this.updateVisibleNodes();
+
+                virtualContainer.addEventListener('scroll', () => {
+                    this.scrollTop = virtualContainer.scrollTop;
+                    this.updateVisibleNodes();
+                });
+
+                // Initial render
+                this.renderVirtualNodes();
+            }
+
+            updateVisibleNodes() {
+                const startIndex = Math.floor(this.scrollTop / this.itemHeight);
+                const endIndex = Math.min(
+                    startIndex + Math.ceil(this.containerHeight / this.itemHeight) + 5,
+                    this.flattenedNodes.length
+                );
+
+                this.visibleNodes = this.flattenedNodes.slice(Math.max(0, startIndex - 5), endIndex);
+                this.renderVirtualNodes();
+            }
+
+            renderVirtualNodes() {
+                const virtualContent = document.getElementById('virtualContent');
+                if (!virtualContent) return;
+
+                const totalHeight = this.flattenedNodes.length * this.itemHeight;
+                virtualContent.style.height = `${totalHeight}px`;
+
+                virtualContent.innerHTML = '';
+
+                this.visibleNodes.forEach((node, index) => {
+                    const actualIndex = this.flattenedNodes.indexOf(node);
+                    const nodeElement = this.createNodeElement(node);
+                    nodeElement.style.position = 'absolute';
+                    nodeElement.style.top = `${actualIndex * this.itemHeight}px`;
+                    nodeElement.style.left = '0';
+                    nodeElement.style.right = '0';
+                    nodeElement.style.height = `${this.itemHeight}px`;
+                    virtualContent.appendChild(nodeElement);
+                });
+            }
+
+            renderNode(node) {
+                const nodeDiv = document.createElement('div');
+                nodeDiv.className = `tree-node ${node.depth === 0 ? 'root' : ''}`;
+
+                const itemDiv = this.createNodeElement(node);
+                nodeDiv.appendChild(itemDiv);
+
+                if (node.children.length > 0) {
+                    const childrenDiv = document.createElement('div');
+                    childrenDiv.className = `tree-children ${node.expanded ? 'expanded' : ''}`;
+
+                    if (node.expanded) {
+                        node.children.forEach(child => {
+                            childrenDiv.appendChild(this.renderNode(child));
+                        });
+                    }
+
+                    nodeDiv.appendChild(childrenDiv);
+                }
+
+                return nodeDiv;
+            }
+
+            createNodeElement(node) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'tree-item';
+                itemDiv.style.paddingLeft = `${node.depth * 20}px`;
+                itemDiv.setAttribute('data-node-id', node.id);
+
+                const toggleDiv = document.createElement('div');
+                toggleDiv.className = `tree-toggle ${node.children.length === 0 ? 'empty' : ''}`;
+
+                if (node.children.length > 0) {
+                    toggleDiv.textContent = node.expanded ? '▼' : '▶';
+                    toggleDiv.style.cursor = 'pointer';
+                }
+
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'tree-label';
+
+                const tagSpan = document.createElement('span');
+                tagSpan.className = 'tree-tag';
+                tagSpan.textContent = `<${node.element.nodeName}>`;
+
+                labelDiv.appendChild(tagSpan);
+
+                // Add attributes (limit to prevent lag)
+                const attrs = Array.from(node.element.attributes || []).slice(0, 3);
+                if (attrs.length > 0) {
+                    const attrSpan = document.createElement('span');
+                    attrSpan.className = 'tree-attr';
+                    attrSpan.textContent = attrs.map(attr => `${attr.name}="${attr.value.slice(0, 50)}${attr.value.length > 50 ? '...' : ''}"`).join(' ');
+                    labelDiv.appendChild(attrSpan);
+                }
+
+                // Add text content if it exists and is not just whitespace
+                const textContent = node.element.textContent?.trim();
+                if (textContent && textContent.length > 0 && node.children.length === 0) {
+                    const textSpan = document.createElement('span');
+                    textSpan.className = 'tree-text';
+                    textSpan.textContent = ` "${textContent.slice(0, 100)}${textContent.length > 100 ? '...' : ''}"`;
+                    labelDiv.appendChild(textSpan);
+                }
+
+                itemDiv.appendChild(toggleDiv);
+                itemDiv.appendChild(labelDiv);
+
+                // Make entire tree item clickable for toggle
+                if (node.children.length > 0) {
+                    itemDiv.style.cursor = 'pointer';
+                    itemDiv.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.toggleNode(node);
+                    });
+                }
+
+                return itemDiv;
+            }
+
+            toggleNode(node) {
+                node.expanded = !node.expanded;
+
+                if (this.isVirtualized) {
+                    this.flattenedNodes = [];
+                    this.flattenTree(this.rootNode);
+                    this.updateVisibleNodes();
+                } else {
+                    // Re-render the entire tree for non-virtualized view
+                    const treeView = document.getElementById('treeView');
+                    treeView.innerHTML = '';
+                    treeView.appendChild(this.renderNode(this.rootNode));
+                }
+            }
+
+            showStats(xmlDoc, file) {
+                const stats = document.getElementById('stats');
+                const elementCount = xmlDoc.getElementsByTagName('*').length;
+                const fileSize = (file.size / 1024).toFixed(2);
+
+                stats.innerHTML = `
+                    File: ${file.name} | 
+                    Size: ${fileSize} KB | 
+                    Elements: ${elementCount} | 
+                    ${this.isVirtualized ? 'Virtual scrolling enabled' : 'Standard rendering'}
+                `;
+                stats.style.display = 'block';
+            }
+
+            makeCompact() {
+                const header = document.querySelector('.header');
+                const uploadArea = document.getElementById('uploadArea');
+                const searchContainer = document.getElementById('searchContainer');
+                
+                header.classList.add('compact');
+                uploadArea.classList.add('compact');
+                searchContainer.classList.add('visible');
+            }
+
+            fuzzyMatch(query, text) {
+                if (!query) return false;
+                
+                query = query.toLowerCase();
+                text = text.toLowerCase();
+                
+                let queryIndex = 0;
+                let textIndex = 0;
+                
+                while (queryIndex < query.length && textIndex < text.length) {
+                    if (query[queryIndex] === text[textIndex]) {
+                        queryIndex++;
+                    }
+                    textIndex++;
+                }
+                
+                return queryIndex === query.length;
+            }
+
+            getNodeText(node) {
+                let text = '';
+                
+                // Add tag name (both with and without brackets for better matching)
+                text += node.element.nodeName + ' ';
+                text += '<' + node.element.nodeName + '> ';
+                
+                // Add attribute names and values
+                if (node.element.attributes) {
+                    for (let attr of node.element.attributes) {
+                        text += attr.name + ' ' + attr.value + ' ';
+                    }
+                }
+                
+                // Add text content
+                const textContent = node.element.textContent?.trim();
+                if (textContent && textContent.length > 0 && node.children.length === 0) {
+                    text += textContent + ' ';
+                }
+                
+                return text.toLowerCase();
+            }
+
+            handleSearch(query) {
+                this.clearSearch();
+                
+                if (!query || query.length < 2) {
+                    document.getElementById('searchResults').textContent = '';
+                    return;
+                }
+                
+                // Make sure we have nodes to search
+                if (!this.allNodes || this.allNodes.length === 0) {
+                    document.getElementById('searchResults').textContent = 'No file loaded.';
+                    return;
+                }
+                
+                // Find all matching nodes using cached nodes
+                this.searchMatches = this.allNodes.filter(node => {
+                    const nodeText = this.getNodeText(node);
+                    return this.fuzzyMatch(query, nodeText);
+                });
+                
+                // Update search results
+                const searchResults = document.getElementById('searchResults');
+                if (this.searchMatches.length > 0) {
+                    searchResults.textContent = `Found ${this.searchMatches.length} matches. Press Enter to navigate.`;
+                    this.highlightMatches();
+                    this.currentMatchIndex = -1;
+                } else {
+                    searchResults.textContent = `No matches found for "${query}".`;
+                }
+            }
+
+            flattenAllNodes(node, result = []) {
+                result.push(node);
+                node.children.forEach(child => this.flattenAllNodes(child, result));
+                return result;
+            }
+
+            highlightMatches() {
+                // Remove previous highlights
+                document.querySelectorAll('.tree-item.search-match').forEach(item => {
+                    item.classList.remove('search-match');
+                });
+                
+                // Add highlights to matches
+                this.searchMatches.forEach(node => {
+                    const elements = document.querySelectorAll(`[data-node-id="${node.id}"]`);
+                    elements.forEach(el => el.classList.add('search-match'));
+                });
+                
+                // Expand parent nodes to show matches
+                this.searchMatches.forEach(node => {
+                    this.expandToNode(node);
+                });
+                
+                // Re-render if needed
+                if (!this.isVirtualized) {
+                    const treeView = document.getElementById('treeView');
+                    treeView.innerHTML = '';
+                    treeView.appendChild(this.renderNode(this.rootNode));
+                } else {
+                    this.flattenedNodes = [];
+                    this.flattenTree(this.rootNode);
+                    this.updateVisibleNodes();
+                }
+            }
+
+            expandToNode(targetNode) {
+                // Find path to root and expand all parent nodes
+                let current = targetNode;
+                const path = [];
+                
+                // Build path to root using cached nodes
+                while (current.depth > 0) {
+                    const parent = this.allNodes.find(node => 
+                        node.depth === current.depth - 1 && 
+                        node.children.includes(current)
+                    );
+                    if (parent) {
+                        path.unshift(parent);
+                        current = parent;
+                    } else {
+                        break;
+                    }
+                }
+                
+                // Expand all nodes in path
+                path.forEach(node => {
+                    node.expanded = true;
+                });
+            }
+
+            navigateToNextMatch() {
+                if (this.searchMatches.length === 0) return;
+                
+                this.currentMatchIndex = (this.currentMatchIndex + 1) % this.searchMatches.length;
+                const targetNode = this.searchMatches[this.currentMatchIndex];
+                
+                // Remove previous highlight
+                document.querySelectorAll('.tree-item.highlighted').forEach(item => {
+                    item.classList.remove('highlighted');
+                });
+                
+                // Highlight current match
+                const elements = document.querySelectorAll(`[data-node-id="${targetNode.id}"]`);
+                elements.forEach(el => {
+                    el.classList.add('highlighted');
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+                
+                // Update search results
+                const searchResults = document.getElementById('searchResults');
+                searchResults.textContent = `Match ${this.currentMatchIndex + 1} of ${this.searchMatches.length}. Press Enter for next.`;
+            }
+
+            clearSearch() {
+                this.searchMatches = [];
+                this.currentMatchIndex = -1;
+                
+                // Remove all highlights
+                document.querySelectorAll('.tree-item.search-match, .tree-item.highlighted').forEach(item => {
+                    item.classList.remove('search-match', 'highlighted');
+                });
+            }
+        }
+
+        // Initialize the viewer
+        new TM7Viewer();
+    </script>
+</body>
+
+</html>

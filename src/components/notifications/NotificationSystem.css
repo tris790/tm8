@@ -1,0 +1,208 @@
+.notification-container {
+  position: fixed;
+  z-index: 1000;
+  max-width: 420px;
+  pointer-events: none;
+}
+
+.notification-container--top-right {
+  top: 1rem;
+  right: 1rem;
+}
+
+.notification-container--top-left {
+  top: 1rem;
+  left: 1rem;
+}
+
+.notification-container--bottom-right {
+  bottom: 1rem;
+  right: 1rem;
+}
+
+.notification-container--bottom-left {
+  bottom: 1rem;
+  left: 1rem;
+}
+
+.notification {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: auto;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.3s ease-out;
+  max-width: 420px;
+  min-width: 320px;
+}
+
+.notification--visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.notification--hidden {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.notification__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  font-size: 0.875rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.notification--success .notification__icon {
+  background: var(--success-bg, #d4edda);
+  color: var(--success-color, #155724);
+}
+
+.notification--error .notification__icon {
+  background: var(--error-bg, #f8d7da);
+  color: var(--error-color, #721c24);
+}
+
+.notification--warning .notification__icon {
+  background: var(--warning-bg, #fff3cd);
+  color: var(--warning-color, #856404);
+}
+
+.notification--info .notification__icon {
+  background: var(--info-bg, #cce7ff);
+  color: var(--info-color, #004085);
+}
+
+.notification__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  line-height: 1.25;
+}
+
+.notification__message {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.notification__action {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  margin-top: 0.25rem;
+}
+
+.notification__action:hover {
+  color: var(--primary-color-hover);
+}
+
+.notification__close {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+  transition: background-color 0.2s;
+}
+
+.notification__close:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .notification {
+    background: var(--bg-primary-dark, #2d3748);
+    border-color: var(--border-color-dark, #4a5568);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .notification__title {
+    color: var(--text-primary-dark, #f7fafc);
+  }
+  
+  .notification__message {
+    color: var(--text-secondary-dark, #cbd5e0);
+  }
+}
+
+/* Animation variants for different positions */
+.notification-container--top-left .notification,
+.notification-container--bottom-left .notification {
+  transform: translateX(-100%);
+}
+
+.notification-container--top-left .notification--visible,
+.notification-container--bottom-left .notification--visible {
+  transform: translateX(0);
+}
+
+.notification-container--top-left .notification--hidden,
+.notification-container--bottom-left .notification--hidden {
+  transform: translateX(-100%);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .notification-container {
+    left: 1rem !important;
+    right: 1rem !important;
+    max-width: none;
+  }
+  
+  .notification {
+    min-width: auto;
+    max-width: none;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .notification {
+    transition: opacity 0.3s ease-out;
+    transform: none !important;
+  }
+  
+  .notification--hidden {
+    opacity: 0;
+  }
+  
+  .notification--visible {
+    opacity: 1;
+  }
+}

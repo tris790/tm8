@@ -1,0 +1,361 @@
+/* Toolbar Styles */
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  width: var(--toolbar-width);
+  background: var(--bg-surface);
+  border-right: 1px solid var(--color-border);
+  padding: var(--spacing-sm);
+  min-height: 100%;
+}
+
+.toolbar__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.toolbar__group:last-child {
+  border-bottom: none;
+}
+
+/* Tool Button */
+.tool-button {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-button:hover:not(.tool-button--disabled) {
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+
+.tool-button--active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.tool-button--active:hover {
+  background: color-mix(in srgb, var(--color-primary) 85%, white);
+}
+
+.tool-button--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tool-button__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-button__shortcut {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 9px;
+  opacity: 0.7;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 1px 3px;
+  border-radius: 2px;
+  line-height: 1;
+}
+
+/* Node Creation Tool */
+.node-creation-tool {
+  position: relative;
+}
+
+.node-creation-tool__main {
+  display: flex;
+}
+
+.node-creation-tool__dropdown-toggle {
+  width: 16px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin-left: -4px;
+  transition: all 0.2s ease;
+}
+
+.node-creation-tool__dropdown-toggle:hover,
+.node-creation-tool__dropdown-toggle.active {
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+
+.node-creation-tool__dropdown {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  z-index: 1000;
+  background: var(--bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  margin-left: var(--spacing-xs);
+}
+
+.node-type-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: left;
+}
+
+.node-type-option:hover {
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+
+.node-type-option.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.node-type-option:first-child {
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.node-type-option:last-child {
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.node-type-option__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.node-type-option__label {
+  flex: 1;
+  font-size: var(--font-size-sm);
+}
+
+.node-type-option__shortcut {
+  font-size: 11px;
+  opacity: 0.7;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+/* Edge Creation Tool */
+.edge-creation-tool {
+  position: relative;
+}
+
+.edge-creation-tool__main {
+  display: flex;
+}
+
+.edge-creation-tool__dropdown-toggle {
+  width: 16px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin-left: -4px;
+  transition: all 0.2s ease;
+}
+
+.edge-creation-tool__dropdown-toggle:hover,
+.edge-creation-tool__dropdown-toggle.active {
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+
+.edge-creation-tool__dropdown {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  z-index: 1000;
+  background: var(--bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+  margin-left: var(--spacing-xs);
+}
+
+.edge-type-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: left;
+}
+
+.edge-type-option:hover {
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+
+.edge-type-option.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.edge-type-option:first-child {
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.edge-type-option:last-child {
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.edge-type-option__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.edge-type-option__label {
+  flex: 1;
+  font-size: var(--font-size-sm);
+}
+
+.edge-type-option__shortcut {
+  font-size: 11px;
+  opacity: 0.7;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+/* Toolbar spacer for positioning */
+.toolbar__spacer {
+  flex: 1;
+}
+
+/* End group positioning */
+.toolbar__group--end {
+  margin-top: auto;
+  border-bottom: none;
+}
+
+/* Toolbar button container for shortcut labels */
+.toolbar__button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Toolbar button base styles */
+.toolbar__button {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar__button:hover:not(.toolbar__button--disabled) {
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+
+.toolbar__button--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Shortcut label under buttons */
+.toolbar__button-shortcut {
+  font-size: 9px;
+  color: var(--color-text-muted);
+  opacity: 0.6;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1;
+  min-height: 10px;
+}
+
+/* Danger button styling */
+.toolbar__button--danger {
+  color: #ef4444;
+}
+
+.toolbar__button--danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    overflow-x: auto;
+  }
+
+  .toolbar__group {
+    flex-direction: row;
+    border-bottom: none;
+    border-right: 1px solid var(--color-border);
+    padding-right: var(--spacing-sm);
+  }
+
+  .toolbar__group:last-child {
+    border-right: none;
+  }
+
+  .node-creation-tool__dropdown,
+  .edge-creation-tool__dropdown {
+    top: 100%;
+    left: 0;
+    margin-left: 0;
+    margin-top: var(--spacing-xs);
+  }
+}

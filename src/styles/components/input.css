@@ -1,0 +1,91 @@
+/* Input Styles */
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--color-muted);
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.input:hover:not(:focus):not(.input--disabled) {
+  border-color: var(--color-muted);
+}
+
+/* Icon Support */
+.input--with-icon {
+  padding-left: 40px;
+}
+
+.input-icon {
+  position: absolute;
+  left: var(--spacing-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-muted);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.input-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* States */
+.input--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: color-mix(in srgb, var(--bg-surface) 50%, var(--color-border));
+}
+
+.input--error {
+  border-color: #ef4444;
+}
+
+.input--error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px color-mix(in srgb, #ef4444 20%, transparent);
+}
+
+/* Search Input Specific */
+.input[type="search"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Number Input */
+.input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.input[type="number"]::-webkit-outer-spin-button,
+.input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

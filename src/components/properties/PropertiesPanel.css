@@ -1,0 +1,101 @@
+.panel {
+  background: var(--bg-surface);
+  color: var(--color-text);
+  padding: var(--spacing-md);
+  width: 100%;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  height: 100%;
+  overflow-y: auto;
+}
+
+h2 {
+  margin-top: 0;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+hr {
+  border: none;
+  height: 1px;
+  background: var(--color-border);
+  margin: var(--spacing-md) 0 var(--spacing-lg) 0;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.row label {
+  color: var(--color-muted);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+}
+
+.row span {
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+.section {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.section label {
+  color: var(--color-text);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  margin-bottom: 4px;
+}
+
+input, textarea {
+  background: var(--bg-primary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 6px;
+  border-radius: 4px;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+details.section {
+  margin-bottom: 16px;
+}
+
+details summary {
+  cursor: pointer;
+  margin-bottom: 8px;
+  color: var(--color-muted);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+}
+
+details summary:hover {
+  color: var(--color-text);
+}
+
+details[open] summary {
+  color: var(--color-primary);
+}
+
+.empty-state {
+  color: var(--color-muted);
+  text-align: center;
+  padding: var(--spacing-xl) var(--spacing-sm);
+  background: rgba(30, 41, 59, 0.2);
+  border-radius: var(--radius);
+  border: 1px dashed var(--color-border);
+  margin: var(--spacing-md) 0;
+}
+

@@ -1,0 +1,11 @@
+/* Import all layout styles */
+@import '../../styles/globals.css';
+@import '../../styles/components/layout.css';
+@import '../../styles/components/header.css';
+@import '../../styles/components/sidebar.css';
+@import '../../styles/components/button.css';
+@import '../../styles/components/input.css';
+@import '../../styles/components/select.css';
+@import '../../styles/components/toolbar.css';
+@import '../../styles/components/properties.css';
+@import '../../styles/components/node-labels.css';

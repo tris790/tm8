@@ -1,0 +1,295 @@
+.error-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.error-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+}
+
+.error-icon {
+  color: var(--error-color, #dc2626);
+  opacity: 0.8;
+}
+
+.error-icon svg {
+  width: 64px;
+  height: 64px;
+}
+
+.error-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.error-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.error-subtitle {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.error-details {
+  margin-top: 1rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  text-align: left;
+}
+
+.error-message {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-family: var(--font-mono, 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace);
+  word-break: break-word;
+}
+
+.error-stack {
+  margin-top: 1rem;
+}
+
+.error-stack-toggle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  border-radius: 0.25rem;
+  padding: 0.25rem;
+}
+
+.error-stack-toggle:hover {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.error-stack-toggle:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.error-stack-content {
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-mono, 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace);
+}
+
+.error-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.error-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.error-action:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.error-action--primary {
+  background: var(--primary-color);
+  color: white;
+}
+
+.error-action--primary:hover {
+  background: var(--primary-color-hover, var(--primary-color));
+  transform: translateY(-1px);
+}
+
+.error-action--secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.error-action--secondary:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color-hover);
+  transform: translateY(-1px);
+}
+
+.error-details-toggle {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  transition: color 0.2s;
+}
+
+.error-details-toggle:hover {
+  color: var(--text-secondary);
+}
+
+.error-details-toggle:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .error-screen {
+    background: var(--bg-primary-dark, #1a202c);
+  }
+  
+  .error-title {
+    color: var(--text-primary-dark, #f7fafc);
+  }
+  
+  .error-subtitle {
+    color: var(--text-secondary-dark, #cbd5e0);
+  }
+  
+  .error-details {
+    background: var(--bg-secondary-dark, #2d3748);
+    border-color: var(--border-color-dark, #4a5568);
+  }
+  
+  .error-message {
+    color: var(--text-primary-dark, #f7fafc);
+  }
+  
+  .error-stack-content {
+    background: var(--bg-primary-dark, #1a202c);
+    border-color: var(--border-color-dark, #4a5568);
+    color: var(--text-secondary-dark, #cbd5e0);
+  }
+  
+  .error-action--secondary {
+    background: var(--bg-secondary-dark, #2d3748);
+    color: var(--text-primary-dark, #f7fafc);
+    border-color: var(--border-color-dark, #4a5568);
+  }
+  
+  .error-action--secondary:hover {
+    background: var(--bg-tertiary-dark, #4a5568);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .error-screen {
+    padding: 1.5rem;
+  }
+  
+  .error-content {
+    gap: 1.25rem;
+  }
+  
+  .error-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .error-title {
+    font-size: 1.5rem;
+  }
+  
+  .error-subtitle {
+    font-size: 1rem;
+  }
+  
+  .error-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .error-action {
+    width: 100%;
+  }
+  
+  .error-details {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-screen {
+    padding: 1rem;
+  }
+  
+  .error-title {
+    font-size: 1.25rem;
+  }
+  
+  .error-subtitle {
+    font-size: 0.875rem;
+  }
+  
+  .error-stack-content {
+    font-size: 0.6875rem;
+  }
+}
+
+/* Accessibility: Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .error-screen {
+    animation: none;
+  }
+  
+  .error-action:hover {
+    transform: none;
+  }
+}
