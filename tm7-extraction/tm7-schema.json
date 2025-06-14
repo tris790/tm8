@@ -1,0 +1,803 @@
+{
+  "elements": {
+    "ThreatModel": {
+      "attributes": [
+        "xmlns",
+        "xmlns:i"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "DrawingSurfaceList": {
+      "attributes": [],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "DrawingSurfaceModel": {
+      "attributes": [
+        "xmlns:z",
+        "z:Id"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "GenericTypeId": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 8,
+      "examples": [
+        "<GenericTypeId xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\">DRAWINGSURFACE</GenericTypeId>",
+        "<GenericTypeId xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\">GE.P</GenericTypeId>",
+        "<GenericTypeId xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\">GE.DF</GenericTypeId>"
+      ]
+    },
+    "Guid": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 6,
+      "examples": [
+        "<Guid xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\">fbedf423-5e9d-4f8e-bc1f-20238c6de320</Guid>",
+        "<Guid xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\">f3a3e749-9802-49ee-9148-94add411e4ee</Guid>"
+      ]
+    },
+    "Properties": {
+      "attributes": [
+        "xmlns",
+        "xmlns:a"
+      ],
+      "children": [],
+      "frequency": 6,
+      "examples": [
+        "<Properties xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\" xmlns:a=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><a:anyType i:type=\"b:HeaderDisplayAttribute\" xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.KnowledgeBase\"><b:DisplayName>Diagram</b:DisplayName><b:Name/><b:Value i:nil=\"true\"/></a:anyType><a:anyType i:type=\"b:StringDisplayAttribute\" xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.KnowledgeBase\"><b:DisplayN...",
+        "<Properties xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\"><a:anyType i:type=\"b:HeaderDisplayAttribute\" xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.KnowledgeBase\"><b:DisplayName>Generic Process</b:DisplayName><b:Name/><b:Value i:nil=\"true\"/></a:anyType><a:anyType i:type=\"b:StringDisplayAttribute\" xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.KnowledgeBase\"><b:DisplayName>Name</b:DisplayName><b:Name/><b:Value i:type=\"c:string\" ..."
+      ]
+    },
+    "a:anyType": {
+      "attributes": [
+        "i:type",
+        "xmlns:b"
+      ],
+      "children": [],
+      "frequency": 66,
+      "examples": [
+        "<a:anyType i:type=\"b:ListDisplayAttribute\" xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.KnowledgeBase\"><b:DisplayName>Stores Log Data</b:DisplayName><b:Name>storesLogData</b:Name><b:Value i:type=\"a:ArrayOfstring\"><a:string>No</a:string><a:string>Yes</a:string></b:Value><b:SelectedIndex>0</b:SelectedIndex></a:anyType>",
+        "<a:anyType i:type=\"b:ListDisplayAttribute\" xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.KnowledgeBase\"><b:DisplayName>Encrypted</b:DisplayName><b:Name>Encrypted</b:Name><b:Value i:type=\"a:ArrayOfstring\"><a:string>No</a:string><a:string>Yes</a:string></b:Value><b:SelectedIndex>0</b:SelectedIndex></a:anyType>",
+        "<a:anyType i:type=\"b:ListDisplayAttribute\" xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.KnowledgeBase\"><b:DisplayName>Signed</b:DisplayName><b:Name>Signed</b:Name><b:Value i:type=\"a:ArrayOfstring\"><a:string>No</a:string><a:string>Yes</a:string></b:Value><b:SelectedIndex>0</b:SelectedIndex></a:anyType>"
+      ]
+    },
+    "b:DisplayName": {
+      "attributes": [],
+      "children": [],
+      "frequency": 61,
+      "examples": [
+        "<b:DisplayName>As Generic Data Store</b:DisplayName>"
+      ]
+    },
+    "b:Value": {
+      "attributes": [
+        "i:nil",
+        "i:type",
+        "xmlns:c"
+      ],
+      "children": [],
+      "frequency": 150,
+      "examples": [
+        "<b:Value i:nil=\"true\"/>",
+        "<b:Value i:nil=\"true\"/>",
+        "<b:Value i:type=\"c:string\" xmlns:c=\"http://www.w3.org/2001/XMLSchema\"/>"
+      ]
+    },
+    "b:Name": {
+      "attributes": [],
+      "children": [],
+      "frequency": 59,
+      "examples": [
+        "<b:Name/>",
+        "<b:Name/>",
+        "<b:Name/>"
+      ]
+    },
+    "TypeId": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 6,
+      "examples": [
+        "<TypeId xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\">DRAWINGSURFACE</TypeId>",
+        "<TypeId xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\">GE.P</TypeId>"
+      ]
+    },
+    "Borders": {
+      "attributes": [
+        "xmlns:a"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "a:KeyValueOfguidanyType": {
+      "attributes": [],
+      "children": [
+        "a:Key"
+      ],
+      "frequency": 7,
+      "examples": [
+        "<a:KeyValueOfguidanyType><a:Key>f3a3e749-9802-49ee-9148-94add411e4ee</a:Key>",
+        "<a:KeyValueOfguidanyType><a:Key>3132cea4-2f19-473f-aa9e-c8c23b924af6</a:Key><a:Value z:Id=\"i13\" i:type=\"Connector\"><GenericTypeId xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\">GE.DF</GenericTypeId><Guid xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\">3132cea4-2f19-473f-aa9e-c8c23b924af6</Guid><Properties xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\"><a:anyType i:type=\"b:HeaderDisplayAttribute\" xmlns:...",
+        "<a:KeyValueOfguidanyType><a:Key>0d9883c1-7709-4a22-9fd0-cf457683a2bc</a:Key>"
+      ]
+    },
+    "a:Key": {
+      "attributes": [],
+      "children": [],
+      "frequency": 6,
+      "examples": []
+    },
+    "a:Value": {
+      "attributes": [
+        "i:type",
+        "z:Id"
+      ],
+      "children": [],
+      "frequency": 4,
+      "examples": []
+    },
+    "a:string": {
+      "attributes": [],
+      "children": [],
+      "frequency": 102,
+      "examples": []
+    },
+    "b:SelectedIndex": {
+      "attributes": [],
+      "children": [],
+      "frequency": 37,
+      "examples": [
+        "<b:SelectedIndex>0</b:SelectedIndex>"
+      ]
+    },
+    "Height": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 3,
+      "examples": [
+        "<Height xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\">100</Height>"
+      ]
+    },
+    "Left": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 3,
+      "examples": [
+        "<Left xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\">48</Left>"
+      ]
+    },
+    "StrokeDashArray": {
+      "attributes": [
+        "i:nil",
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 3,
+      "examples": [
+        "<StrokeDashArray i:nil=\"true\" xmlns=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts\"/>"
+      ]
+    },
+    "StrokeThickness": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "Top": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "Width": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "HandleX": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "HandleY": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "PortSource": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "PortTarget": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "SourceGuid": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "SourceX": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "SourceY": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "TargetGuid": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "TargetX": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "TargetY": {
+      "attributes": [
+        "xmlns"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "a:Validation": {
+      "attributes": [
+        "xmlns:z",
+        "z:Id"
+      ],
+      "children": [],
+      "frequency": 6,
+      "examples": [
+        "<a:Validation z:Id=\"i18\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><a:ElementGuids xmlns:b=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><b:guid>fe771638-8554-4eea-9345-a9d60c27c972</b:guid><b:guid>fe771638-8554-4eea-9345-a9d60c27c972</b:guid></a:ElementGuids><a:Enabled>true</a:Enabled><a:Guid>00000000-0000-0000-0000-000000000000</a:Guid><a:IssueGuid>102be8a5-2c83-439a-9157-f7c7e9ac1321</a:IssueGuid><a:Items xmlns:b=\"http://schemas.microsoft.com/2003/10/Serializ...",
+        "<a:Validation z:Id=\"i19\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><a:ElementGuids xmlns:b=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><b:guid>3132cea4-2f19-473f-aa9e-c8c23b924af6</b:guid><b:guid>3132cea4-2f19-473f-aa9e-c8c23b924af6</b:guid></a:ElementGuids><a:Enabled>true</a:Enabled><a:Guid>00000000-0000-0000-0000-000000000000</a:Guid><a:IssueGuid>102be8a5-2c83-439a-9157-f7c7e9ac1321</a:IssueGuid><a:Items xmlns:b=\"http://schemas.microsoft.com/2003/10/Serializ...",
+        "<a:Validation z:Id=\"i20\" xmlns:z=\"http://schemas.microsoft.com/2003/10/Serialization/\"><a:ElementGuids xmlns:b=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><b:guid>0d9883c1-7709-4a22-9fd0-cf457683a2bc</b:guid><b:guid>0d9883c1-7709-4a22-9fd0-cf457683a2bc</b:guid></a:ElementGuids><a:Enabled>true</a:Enabled><a:Guid>00000000-0000-0000-0000-000000000000</a:Guid><a:IssueGuid>102be8a5-2c83-439a-9157-f7c7e9ac1321</a:IssueGuid><a:Items xmlns:b=\"http://schemas.microsoft.com/2003/10/Serializ..."
+      ]
+    },
+    "a:ElementGuids": {
+      "attributes": [
+        "xmlns:b"
+      ],
+      "children": [],
+      "frequency": 3,
+      "examples": []
+    },
+    "b:guid": {
+      "attributes": [],
+      "children": [],
+      "frequency": 6,
+      "examples": []
+    },
+    "a:Enabled": {
+      "attributes": [],
+      "children": [],
+      "frequency": 3,
+      "examples": []
+    },
+    "a:Guid": {
+      "attributes": [],
+      "children": [],
+      "frequency": 3,
+      "examples": []
+    },
+    "a:IssueGuid": {
+      "attributes": [],
+      "children": [],
+      "frequency": 3,
+      "examples": []
+    },
+    "a:Items": {
+      "attributes": [
+        "xmlns:b"
+      ],
+      "children": [],
+      "frequency": 6,
+      "examples": [
+        "<a:Items xmlns:b=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"/>",
+        "<a:Items xmlns:b=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"/>",
+        "<a:Items xmlns:b=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"/>"
+      ]
+    },
+    "a:Message": {
+      "attributes": [],
+      "children": [],
+      "frequency": 3,
+      "examples": []
+    },
+    "a:SourceGuid": {
+      "attributes": [],
+      "children": [],
+      "frequency": 3,
+      "examples": []
+    },
+    "Version": {
+      "attributes": [],
+      "children": [],
+      "frequency": 2,
+      "examples": [
+        "<Version>4.3</Version>"
+      ]
+    },
+    "KnowledgeBase": {
+      "attributes": [
+        "xmlns:a",
+        "xmlns:z",
+        "z:Id"
+      ],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "a:GenericElements": {
+      "attributes": [],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "a:ElementType": {
+      "attributes": [],
+      "children": [],
+      "frequency": 30,
+      "examples": [
+        "<a:ElementType><a:IsExtension>false</a:IsExtension><a:Attributes/><a:AvailableToBaseModels xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.ExternalStorage.OM\"/><a:Behavior i:nil=\"true\"/><a:Description>\n        An arc representation of a trust boundary.\n      </a:Description><a:Hidden>false</a:Hidden><a:Id>GE.TB.L</a:Id><a:ImageLocation>Before label</a:ImageLocation><a:ImageSource>iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAZdEVYdFNvZnR3Y...",
+        "<a:ElementType><a:IsExtension>false</a:IsExtension><a:Attributes/><a:AvailableToBaseModels xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.ExternalStorage.OM\"/><a:Behavior i:nil=\"true\"/><a:Description>\n        A border representation of a trust boundary.\n      </a:Description><a:Hidden>false</a:Hidden><a:Id>GE.TB.B</a:Id><a:ImageLocation>Before label</a:ImageLocation><a:ImageSource>iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl...",
+        "<a:ElementType><a:IsExtension>false</a:IsExtension><a:Attributes/><a:AvailableToBaseModels xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.ExternalStorage.OM\"/><a:Behavior i:nil=\"true\"/><a:Description>\n      A representation of an annotation.\n    </a:Description><a:Hidden>false</a:Hidden><a:Id>GE.A</a:Id><a:ImageLocation i:nil=\"true\"/><a:ImageSource i:nil=\"true\"/><a:ImageStream i:nil=\"true\"/><a:Name>Free Text Annotation</a:Name><a:ParentId>ROOT</a:ParentId><a:Representation>Annot..."
+      ]
+    },
+    "a:IsExtension": {
+      "attributes": [],
+      "children": [],
+      "frequency": 72,
+      "examples": [
+        "<a:IsExtension>false</a:IsExtension>",
+        "<a:IsExtension>false</a:IsExtension>",
+        "<a:IsExtension>false</a:IsExtension>"
+      ]
+    },
+    "a:Attributes": {
+      "attributes": [],
+      "children": [
+        "a:Attribute"
+      ],
+      "frequency": 21,
+      "examples": [
+        "<a:Attributes><a:Attribute><a:IsExtension>false</a:IsExtension><a:AttributeValues xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Interfaces\"><b:Value>Not Selected</b:Value><b:Value>Managed</b:Value><b:Value>Unmanaged</b:Value></a:AttributeValues><a:DisplayName>Code Type</a:DisplayName><a:Inheritance>Virtual</a:Inheritance><a:Mode>Dynamic</a:Mode><a:Name>codeType</a:Name><a:Type>List</a:Type></a:Attribute><a:Attribute><a:IsExtension>false</a:IsExtension><a:AttributeValues xmlns:b...",
+        "<a:Attributes/>",
+        "<a:Attributes/>"
+      ]
+    },
+    "a:Attribute": {
+      "attributes": [],
+      "children": [],
+      "frequency": 36,
+      "examples": [
+        "<a:Attribute><a:IsExtension>false</a:IsExtension><a:AttributeValues xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Interfaces\"><b:Value>No</b:Value><b:Value>Yes</b:Value></a:AttributeValues><a:DisplayName>Contacts</a:DisplayName><a:Inheritance>Virtual</a:Inheritance><a:Mode>Dynamic</a:Mode><a:Name>Contacts</a:Name><a:Type>List</a:Type></a:Attribute>",
+        "<a:Attribute><a:IsExtension>false</a:IsExtension><a:AttributeValues xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Interfaces\"><b:Value>No</b:Value><b:Value>Yes</b:Value></a:AttributeValues><a:DisplayName>Calendar Events</a:DisplayName><a:Inheritance>Virtual</a:Inheritance><a:Mode>Dynamic</a:Mode><a:Name>Calendar</a:Name><a:Type>List</a:Type></a:Attribute>",
+        "<a:Attribute><a:IsExtension>false</a:IsExtension><a:AttributeValues xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.Interfaces\"><b:Value>No</b:Value><b:Value>Yes</b:Value></a:AttributeValues><a:DisplayName>SMS messages</a:DisplayName><a:Inheritance>Virtual</a:Inheritance><a:Mode>Dynamic</a:Mode><a:Name>SMSmessages</a:Name><a:Type>List</a:Type></a:Attribute>"
+      ]
+    },
+    "a:AttributeValues": {
+      "attributes": [
+        "xmlns:b"
+      ],
+      "children": [],
+      "frequency": 30,
+      "examples": []
+    },
+    "a:DisplayName": {
+      "attributes": [],
+      "children": [],
+      "frequency": 29,
+      "examples": []
+    },
+    "a:Inheritance": {
+      "attributes": [],
+      "children": [],
+      "frequency": 29,
+      "examples": []
+    },
+    "a:Mode": {
+      "attributes": [],
+      "children": [],
+      "frequency": 29,
+      "examples": []
+    },
+    "a:Name": {
+      "attributes": [],
+      "children": [],
+      "frequency": 63,
+      "examples": [
+        "<a:Name>Generic Data Flow</a:Name>",
+        "<a:Name>Browser Client</a:Name>",
+        "<a:Name>Web Application</a:Name>"
+      ]
+    },
+    "a:Type": {
+      "attributes": [],
+      "children": [],
+      "frequency": 29,
+      "examples": []
+    },
+    "a:AvailableToBaseModels": {
+      "attributes": [
+        "xmlns:b"
+      ],
+      "children": [],
+      "frequency": 32,
+      "examples": [
+        "<a:AvailableToBaseModels xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.ExternalStorage.OM\"/>",
+        "<a:AvailableToBaseModels xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.ExternalStorage.OM\"/>",
+        "<a:AvailableToBaseModels xmlns:b=\"http://schemas.datacontract.org/2004/07/ThreatModeling.ExternalStorage.OM\"/>"
+      ]
+    },
+    "a:Behavior": {
+      "attributes": [
+        "i:nil"
+      ],
+      "children": [],
+      "frequency": 32,
+      "examples": [
+        "<a:Behavior i:nil=\"true\"/>",
+        "<a:Behavior i:nil=\"true\"/>",
+        "<a:Behavior i:nil=\"true\"/>"
+      ]
+    },
+    "a:Description": {
+      "attributes": [],
+      "children": [],
+      "frequency": 35,
+      "examples": [
+        "<a:Description>A representation of a generic process.</a:Description>",
+        "<a:Description>\n      A Windows Process.\n    </a:Description>",
+        "<a:Description>\n      A representation of an browser plugin.\n    </a:Description>"
+      ]
+    },
+    "a:Hidden": {
+      "attributes": [],
+      "children": [],
+      "frequency": 25,
+      "examples": [
+        "<a:Hidden>false</a:Hidden>",
+        "<a:Hidden>false</a:Hidden>",
+        "<a:Hidden>false</a:Hidden>"
+      ]
+    },
+    "a:Id": {
+      "attributes": [],
+      "children": [],
+      "frequency": 40,
+      "examples": [
+        "<a:Id>GE.P</a:Id>",
+        "<a:Id>SE.P.TMCore.OSProcess</a:Id>",
+        "<a:Id>SE.P.TMCore.PlugIn</a:Id>"
+      ]
+    },
+    "a:ImageLocation": {
+      "attributes": [
+        "i:nil"
+      ],
+      "children": [],
+      "frequency": 24,
+      "examples": [
+        "<a:ImageLocation>Centered on stencil</a:ImageLocation>",
+        "<a:ImageLocation>Centered on stencil</a:ImageLocation>",
+        "<a:ImageLocation>Centered on stencil</a:ImageLocation>"
+      ]
+    },
+    "a:ImageSource": {
+      "attributes": [
+        "i:nil"
+      ],
+      "children": [],
+      "frequency": 18,
+      "examples": []
+    },
+    "a:Source": {
+      "attributes": [],
+      "children": [],
+      "frequency": 3,
+      "examples": [
+        "<a:Source/>",
+        "<a:Source/>",
+        "<a:Source/>"
+      ]
+    },
+    "a:ImageStream": {
+      "attributes": [
+        "i:nil"
+      ],
+      "children": [],
+      "frequency": 34,
+      "examples": [
+        "<a:ImageStream i:nil=\"true\"/>",
+        "<a:ImageStream i:nil=\"true\"/>",
+        "<a:ImageStream i:nil=\"true\"/>"
+      ]
+    },
+    "a:ParentId": {
+      "attributes": [],
+      "children": [],
+      "frequency": 28,
+      "examples": [
+        "<a:ParentId>ROOT</a:ParentId>",
+        "<a:ParentId>GE.P</a:ParentId>",
+        "<a:ParentId>GE.P</a:ParentId>"
+      ]
+    },
+    "a:Representation": {
+      "attributes": [],
+      "children": [],
+      "frequency": 27,
+      "examples": [
+        "<a:Representation>Line</a:Representation>",
+        "<a:Representation>Inherited</a:Representation>",
+        "<a:Representation>Inherited</a:Representation>"
+      ]
+    },
+    "a:Shape": {
+      "attributes": [
+        "i:nil"
+      ],
+      "children": [],
+      "frequency": 33,
+      "examples": [
+        "<a:Shape i:nil=\"true\"/>",
+        "<a:Shape i:nil=\"true\"/>",
+        "<a:Shape i:nil=\"true\"/>"
+      ]
+    },
+    "a:Manifest": {
+      "attributes": [],
+      "children": [],
+      "frequency": 2,
+      "examples": [
+        "<a:Manifest><a:Author>TwC MSEC</a:Author><a:Id>cc62ebae-3748-431e-b1df-f4220dc9003f</a:Id><a:Name>SDL TM Knowledge Base (Core)</a:Name><a:Version>4.1.0.9</a:Version></a:Manifest>"
+      ]
+    },
+    "a:Author": {
+      "attributes": [],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "a:Version": {
+      "attributes": [],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "a:StandardElements": {
+      "attributes": [],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "a:ThreatCategories": {
+      "attributes": [],
+      "children": [],
+      "frequency": 1,
+      "examples": []
+    },
+    "a:ThreatCategory": {
+      "attributes": [],
+      "children": [],
+      "frequency": 9,
+      "examples": [
+        "<a:ThreatCategory><a:IsExtension>false</a:IsExtension><a:Id>S</a:Id><a:LongDescription/><a:Name>Spoofing</a:Name><a:ShortDescription>Spoofing is when a process or entity is something other than its claimed identity. Examples include substituting a process, a file, website or a network address.</a:ShortDescription></a:ThreatCategory>",
+        "<a:ThreatCategory><a:IsExtension>false</a:IsExtension><a:Id>T</a:Id><a:LongDescription/><a:Name>Tampering</a:Name><a:ShortDescription>Tampering is the act of altering the bits. Tampering with a process involves changing bits in the running process. Similarly, Tampering with a data flow involves changing bits on the wire or between two running processes.</a:ShortDescription></a:ThreatCategory>",
+        "<a:ThreatCategory><a:IsExtension>false</a:IsExtension><a:Id>R</a:Id><a:LongDescription/><a:Name>Repudiation</a:Name><a:ShortDescription>Repudiation threats involve an adversary denying that something happened.</a:ShortDescription></a:ThreatCategory>"
+      ]
+    },
+    "a:ShortDescription": {
+      "attributes": [],
+      "children": [],
+      "frequency": 5,
+      "examples": []
+    },
+    "Id": {
+      "attributes": [],
+      "children": [],
+      "frequency": 26,
+      "examples": [
+        "<Id>5d3b996b-aed5-4d95-8cf6-617bb67bf042</Id>"
+      ]
+    },
+    "ThreatMetaDatum": {
+      "attributes": [],
+      "children": [],
+      "frequency": 29,
+      "examples": [
+        "<ThreatMetaDatum><Name>UserThreatDescription</Name><Label>Description</Label><HideFromUI>false</HideFromUI><Values xmlns:b=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><b:string>Attackers who can send a series of packets or messages may be able to overlap data. For example, packet 1 may be 100 bytes starting at offset 0. Packet 2 may be 100 bytes starting at offset 25. Packet 2 will overwrite 75 bytes of packet 1. Ensure you reassemble data before filtering it, and ensure you expl...",
+        "<ThreatMetaDatum><Name>Priority</Name><Label>Priority</Label><HideFromUI>false</HideFromUI><Values xmlns:b=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><b:string i:nil=\"true\"/></Values><Id>bc9c6e2a-15d0-4863-9cac-589e51e4ca1e</Id></ThreatMetaDatum>",
+        "<ThreatMetaDatum><Name>Priority</Name><Label>Priority</Label><HideFromUI>false</HideFromUI><Values xmlns:b=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><b:string i:nil=\"true\"/></Values><Id>bc9c6e2a-15d0-4863-9cac-589e51e4ca1e</Id></ThreatMetaDatum>"
+      ]
+    },
+    "Name": {
+      "attributes": [],
+      "children": [],
+      "frequency": 25,
+      "examples": []
+    },
+    "Label": {
+      "attributes": [],
+      "children": [],
+      "frequency": 25,
+      "examples": []
+    },
+    "HideFromUI": {
+      "attributes": [],
+      "children": [],
+      "frequency": 24,
+      "examples": []
+    },
+    "Values": {
+      "attributes": [
+        "xmlns:b"
+      ],
+      "children": [],
+      "frequency": 24,
+      "examples": []
+    },
+    "b:string": {
+      "attributes": [
+        "i:nil"
+      ],
+      "children": [],
+      "frequency": 32,
+      "examples": [
+        "<b:string i:nil=\"true\"/>",
+        "<b:string i:nil=\"true\"/>",
+        "<b:string i:nil=\"true\"/>"
+      ]
+    },
+    "a:RelatedCategory": {
+      "attributes": [
+        "i:nil"
+      ],
+      "children": [],
+      "frequency": 16,
+      "examples": [
+        "<a:RelatedCategory i:nil=\"true\"/>",
+        "<a:RelatedCategory i:nil=\"true\"/>",
+        "<a:RelatedCategory i:nil=\"true\"/>"
+      ]
+    },
+    "a:ShortTitle": {
+      "attributes": [],
+      "children": [],
+      "frequency": 10,
+      "examples": [
+        "<a:ShortTitle>Collision Attacks</a:ShortTitle>",
+        "<a:ShortTitle>Information Disclosure (v3)</a:ShortTitle>"
+      ]
+    },
+    "a:ThreatType": {
+      "attributes": [],
+      "children": [],
+      "frequency": 14,
+      "examples": [
+        "<a:ThreatType><a:IsExtension>false</a:IsExtension><a:Category>T</a:Category><a:Description>Log readers can come under attack via log files. Consider ways to canonicalize data in all logs. Implement a single reader for the logs, if possible, in order to reduce attack surface area. Be sure to understand and document log file elements which come from untrusted sources.</a:Description><a:GenerationFilters><a:Exclude/><a:Include>(source is 'GE.P' and target is 'GE.DS' and target.storesLogData is 'Yes...",
+        "<a:ThreatType><a:IsExtension>false</a:IsExtension><a:Category>T</a:Category><a:Description>An attacker can read or modify data transmitted over an authenticated dataflow.</a:Description><a:GenerationFilters><a:Exclude>(flow.providesConfidentiality is 'Yes' and flow.providesIntegrity is 'Yes')</a:Exclude><a:Include>(flow.authenticatesSource is 'Yes' or flow.authenticatesDestination is 'Yes')</a:Include></a:GenerationFilters><a:Id>T6</a:Id><a:PropertiesMetaData><ThreatMetaDatum><Name>UserThreatSho...",
+        "<a:ThreatType><a:IsExtension>false</a:IsExtension><a:Category>T</a:Category><a:Description>SQL injection is an attack in which malicious code is inserted into strings that are later passed to an instance of SQL Server for parsing and execution. Any procedure that constructs SQL statements should be reviewed for injection vulnerabilities because SQL Server will execute all syntactically valid queries that it receives. Even parameterized data can be manipulated by a skilled and determined attacker..."
+      ]
+    },
+    "a:Category": {
+      "attributes": [],
+      "children": [],
+      "frequency": 10,
+      "examples": [
+        "<a:Category>T</a:Category>",
+        "<a:Category>I</a:Category>"
+      ]
+    },
+    "a:GenerationFilters": {
+      "attributes": [],
+      "children": [],
+      "frequency": 10,
+      "examples": [
+        "<a:GenerationFilters><a:Exclude/><a:Include>\n        (target is 'SE.DS.TMCore.SQL' and source is 'GE.EI')\n      </a:Include></a:GenerationFilters>",
+        "<a:GenerationFilters><a:Exclude/><a:Include>source is 'GE.P' and target is 'GE.DS' and target.storesCredentials is 'Yes'</a:Include></a:GenerationFilters>"
+      ]
+    },
+    "a:Include": {
+      "attributes": [],
+      "children": [],
+      "frequency": 8,
+      "examples": []
+    },
+    "a:PropertiesMetaData": {
+      "attributes": [],
+      "children": [],
+      "frequency": 8,
+      "examples": []
+    },
+    "a:Exclude": {
+      "attributes": [],
+      "children": [],
+      "frequency": 6,
+      "examples": [
+        "<a:Exclude/>",
+        "<a:Exclude/>",
+        "<a:Exclude/>"
+      ]
+    }
+  },
+  "namespaces": [
+    "http://schemas.datacontract.org/2004/07/ThreatModeling.Model",
+    "http://www.w3.org/2001/XMLSchema-instance",
+    "http://schemas.microsoft.com/2003/10/Serialization/",
+    "http://schemas.datacontract.org/2004/07/ThreatModeling.Model.Abstracts",
+    "http://schemas.microsoft.com/2003/10/Serialization/Arrays",
+    "http://schemas.datacontract.org/2004/07/ThreatModeling.KnowledgeBase",
+    "http://www.w3.org/2001/XMLSchema",
+    "http://schemas.datacontract.org/2004/07/ThreatModeling.Interfaces",
+    "http://schemas.datacontract.org/2004/07/ThreatModeling.ExternalStorage.OM"
+  ],
+  "statistics": {
+    "totalElements": 89,
+    "totalNamespaces": 9
+  },
+  "discoveryMeta": {
+    "timestamp": "2025-06-13T22:12:07.014Z",
+    "method": "streaming-analysis"
+  },
+  "rootCandidates": []
+}

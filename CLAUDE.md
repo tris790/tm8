@@ -57,3 +57,7 @@ TM8 is a high-performance threat modeling application built with React + TypeScr
 - Extensible entity types
 - WebGL rendering for performance
 - React hooks for state management
+
+**Additional Notes:**
+- use bun instead of node
+- we use webgl, when adding/modifing something relatated to "canvas" we are talking about webgl.

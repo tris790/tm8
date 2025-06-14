@@ -3,12 +3,15 @@
  */
 
 import { Camera } from './Camera';
-import { Graph, Node, CanvasMode, MouseEvent as CanvasMouseEvent, DragEvent, WheelEvent as CanvasWheelEvent } from '../types';
+import { Graph, Node, CanvasMode, MouseEvent as CanvasMouseEvent, DragEvent, WheelEvent as CanvasWheelEvent, WorldSelectionRectangle } from '../types';
 
 export interface InteractionCallbacks {
   onNodeSelect?: (nodeId: string, addToSelection: boolean) => void;
   onNodeHover?: (nodeId: string | null) => void;
   onNodeDrag?: (nodeId: string, deltaX: number, deltaY: number) => void;
+  onBoundaryDrag?: (boundaryId: string, deltaX: number, deltaY: number) => void;
+  onMultiEntityDrag?: (entityIds: string[], deltaX: number, deltaY: number) => void;
+  onDragEnd?: () => void;
   onEdgeSelect?: (edgeId: string, addToSelection: boolean) => void;
   onEdgeHover?: (edgeId: string | null) => void;
   onBoundarySelect?: (boundaryId: string, addToSelection: boolean) => void;
@@ -21,6 +24,8 @@ export interface InteractionCallbacks {
   onEdgePreview?: (sourceNodeId: string | null, targetX?: number, targetY?: number) => void;
   onBoundaryCreate?: (x: number, y: number, width: number, height: number) => void;
   onDeselectAll?: () => void;
+  onSelectionRectangleUpdate?: (rect: WorldSelectionRectangle) => void;
+  onSelectionRectangleComplete?: (rect: WorldSelectionRectangle) => void;
 }
 
 export class InteractionHandler {
@@ -42,6 +47,11 @@ export class InteractionHandler {
   private hoveredEdgeId: string | null = null;
   private hoveredBoundaryId: string | null = null;
   private draggedNodeId: string | null = null;
+  private draggedBoundaryId: string | null = null;
+  
+  // Multi-selection dragging
+  private isDraggingMultiple: boolean = false;
+  private selectedEntities: Set<string> = new Set();
   
   // Edge drawing state
   private edgeSourceNodeId: string | null = null;
@@ -51,6 +61,11 @@ export class InteractionHandler {
   private isDrawingBoundary: boolean = false;
   private boundaryStartX: number = 0;
   private boundaryStartY: number = 0;
+  
+  // Selection rectangle state
+  private isDrawingSelection: boolean = false;
+  private selectionStartWorldX: number = 0;
+  private selectionStartWorldY: number = 0;
   
   // Mouse state
   private mouseX: number = 0;
@@ -154,12 +169,34 @@ export class InteractionHandler {
 
       switch (this.mode) {
         case CanvasMode.SELECT:
-          if (this.draggedNodeId) {
-            // Drag node - use world coordinate delta
+          if (this.isDraggingMultiple) {
+            // Drag multiple selected entities
+            const currentWorldPos = this.camera.screenToWorld(this.mouseX, this.mouseY);
+            const worldDeltaX = currentWorldPos.x - this.dragStartWorldX;
+            const worldDeltaY = currentWorldPos.y - this.dragStartWorldY;
+            this.handleMultiEntityDrag(worldDeltaX, worldDeltaY);
+          } else if (this.draggedNodeId) {
+            // Drag single node - use world coordinate delta
             const currentWorldPos = this.camera.screenToWorld(this.mouseX, this.mouseY);
             const worldDeltaX = currentWorldPos.x - this.dragStartWorldX;
             const worldDeltaY = currentWorldPos.y - this.dragStartWorldY;
             this.callbacks.onNodeDrag?.(this.draggedNodeId, worldDeltaX, worldDeltaY);
+          } else if (this.draggedBoundaryId) {
+            // Drag single boundary
+            const currentWorldPos = this.camera.screenToWorld(this.mouseX, this.mouseY);
+            const worldDeltaX = currentWorldPos.x - this.dragStartWorldX;
+            const worldDeltaY = currentWorldPos.y - this.dragStartWorldY;
+            this.callbacks.onBoundaryDrag?.(this.draggedBoundaryId, worldDeltaX, worldDeltaY);
+          } else if (this.isDrawingSelection) {
+            // Update rectangular selection
+            const currentWorldPos = this.camera.screenToWorld(this.mouseX, this.mouseY);
+            this.callbacks.onSelectionRectangleUpdate?.({
+              startWorldX: this.selectionStartWorldX,
+              startWorldY: this.selectionStartWorldY,
+              endWorldX: currentWorldPos.x,
+              endWorldY: currentWorldPos.y,
+              isActive: true
+            });
           } else {
             // Pan canvas - SIMPLE: direct pixel-to-world conversion
             this.handleSimplePan(deltaX, deltaY);
@@ -232,11 +269,48 @@ export class InteractionHandler {
         
         this.isDrawingBoundary = false;
       }
+      
+      // Handle rectangular selection completion
+      if (this.isDrawingSelection && event.button === 0) {
+        const currentWorldPos = this.camera.screenToWorld(this.mouseX, this.mouseY);
+        
+        // Only complete selection if the rectangle has meaningful size
+        const width = Math.abs(currentWorldPos.x - this.selectionStartWorldX);
+        const height = Math.abs(currentWorldPos.y - this.selectionStartWorldY);
+        
+        if (width > 10 && height > 10) { // Minimum 10 world units
+          this.callbacks.onSelectionRectangleComplete?.({
+            startWorldX: this.selectionStartWorldX,
+            startWorldY: this.selectionStartWorldY,
+            endWorldX: currentWorldPos.x,
+            endWorldY: currentWorldPos.y,
+            isActive: false
+          });
+        } else {
+          // Clear selection rectangle if too small
+          this.callbacks.onSelectionRectangleUpdate?.({
+            startWorldX: 0,
+            startWorldY: 0,
+            endWorldX: 0,
+            endWorldY: 0,
+            isActive: false
+          });
+        }
+        
+        this.isDrawingSelection = false;
+      }
+    }
+
+    // Notify drag end if we were dragging
+    if (this.isDragging && (this.draggedNodeId || this.draggedBoundaryId || this.isDraggingMultiple)) {
+      this.callbacks.onDragEnd?.();
     }
 
     this.mouseDown = false;
     this.isDragging = false;
     this.draggedNodeId = null;
+    this.draggedBoundaryId = null;
+    this.isDraggingMultiple = false;
     this.canvas.style.cursor = this.getCursorForMode();
 
     event.preventDefault();
@@ -264,13 +338,23 @@ export class InteractionHandler {
     this.mouseDown = false;
     this.isDragging = false;
     this.draggedNodeId = null;
+    this.draggedBoundaryId = null;
+    this.isDraggingMultiple = false;
     this.hoveredNodeId = null;
     this.hoveredEdgeId = null;
     this.hoveredBoundaryId = null;
     this.isDrawingBoundary = false;
+    this.isDrawingSelection = false;
     this.callbacks.onNodeHover?.(null);
     this.callbacks.onEdgeHover?.(null);
     this.callbacks.onBoundaryHover?.(null);
+    this.callbacks.onSelectionRectangleUpdate?.({
+      startWorldX: 0,
+      startWorldY: 0,
+      endWorldX: 0,
+      endWorldY: 0,
+      isActive: false
+    });
     this.canvas.style.cursor = 'default';
   }
 
@@ -365,17 +449,50 @@ export class InteractionHandler {
   private handleSelectMouseDown(event: MouseEvent): void {
     const worldPos = this.camera.screenToWorld(this.mouseX, this.mouseY);
     const nodeId = this.getNodeAtPosition(worldPos.x, worldPos.y);
+    const boundaryId = !nodeId ? this.getBoundaryAtPosition(worldPos.x, worldPos.y) : null;
     
     if (nodeId && event.button === 0) {
-      // Start dragging node
-      this.draggedNodeId = nodeId;
-      this.isDragging = true;
-      this.canvas.style.cursor = 'grabbing';
+      // Check if node is already selected for multi-drag
+      if (this.selectedEntities.has(nodeId) && this.selectedEntities.size > 1) {
+        // Start multi-entity drag
+        this.isDraggingMultiple = true;
+        this.isDragging = true;
+        this.canvas.style.cursor = 'grabbing';
+      } else {
+        // Start single node drag
+        this.draggedNodeId = nodeId;
+        this.isDragging = true;
+        this.canvas.style.cursor = 'grabbing';
+      }
+    } else if (boundaryId && event.button === 0) {
+      // Check if boundary is already selected for multi-drag
+      if (this.selectedEntities.has(boundaryId) && this.selectedEntities.size > 1) {
+        // Start multi-entity drag
+        this.isDraggingMultiple = true;
+        this.isDragging = true;
+        this.canvas.style.cursor = 'grabbing';
+      } else {
+        // Start single boundary drag
+        this.draggedBoundaryId = boundaryId;
+        this.isDragging = true;
+        this.canvas.style.cursor = 'grabbing';
+      }
     } else if (event.button === 0) {
-      // Start panning canvas
+      // Start rectangular selection or canvas pan
+      this.isDrawingSelection = true;
+      this.selectionStartWorldX = worldPos.x;
+      this.selectionStartWorldY = worldPos.y;
       this.isDragging = true;
-      this.canvas.style.cursor = 'grabbing';
+      this.canvas.style.cursor = 'crosshair';
     }
+  }
+
+  /**
+   * Handle multi-entity dragging
+   */
+  private handleMultiEntityDrag(worldDeltaX: number, worldDeltaY: number): void {
+    const entityIds = Array.from(this.selectedEntities);
+    this.callbacks.onMultiEntityDrag?.(entityIds, worldDeltaX, worldDeltaY);
   }
 
   /**
@@ -663,6 +780,110 @@ export class InteractionHandler {
    */
   setGraph(graph: Graph): void {
     this.graph = graph;
+  }
+
+  /**
+   * Update selected entities for multi-entity operations
+   */
+  setSelectedEntities(selectedIds: Set<string>): void {
+    this.selectedEntities = new Set(selectedIds);
+  }
+
+  /**
+   * Get entities within a world-coordinate rectangle
+   */
+  getEntitiesInRectangle(startX: number, startY: number, endX: number, endY: number): string[] {
+    if (!this.graph) return [];
+
+    const minX = Math.min(startX, endX);
+    const maxX = Math.max(startX, endX);
+    const minY = Math.min(startY, endY);
+    const maxY = Math.max(startY, endY);
+
+    const selectedIds: string[] = [];
+
+    // Check nodes
+    for (const node of this.graph.nodes) {
+      const { x, y } = node.position;
+      if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
+        selectedIds.push(node.id);
+      }
+    }
+
+    // Check boundaries
+    for (const boundary of this.graph.boundaries) {
+      const { x, y } = boundary.position;
+      const { width, height } = boundary.bounds;
+      
+      // Check if boundary overlaps with selection rectangle
+      const boundaryMaxX = x + width;
+      const boundaryMaxY = y + height;
+      
+      if (!(maxX < x || minX > boundaryMaxX || maxY < y || minY > boundaryMaxY)) {
+        selectedIds.push(boundary.id);
+      }
+    }
+
+    // Check edges (based on their endpoints)
+    for (const edge of this.graph.edges) {
+      const sourceNode = this.graph.nodes.find(n => n.id === edge.source);
+      if (!sourceNode) continue;
+
+      for (const targetId of edge.targets) {
+        const targetNode = this.graph.nodes.find(n => n.id === targetId);
+        if (!targetNode) continue;
+
+        // Check if edge line intersects with selection rectangle
+        if (this.lineIntersectsRectangle(
+          sourceNode.position.x, sourceNode.position.y,
+          targetNode.position.x, targetNode.position.y,
+          minX, minY, maxX, maxY
+        )) {
+          selectedIds.push(edge.id);
+          break; // Only add edge once even if multiple segments are selected
+        }
+      }
+    }
+
+    return selectedIds;
+  }
+
+  /**
+   * Check if a line intersects with a rectangle
+   */
+  private lineIntersectsRectangle(x1: number, y1: number, x2: number, y2: number, 
+                                  rectMinX: number, rectMinY: number, rectMaxX: number, rectMaxY: number): boolean {
+    // Check if either endpoint is inside the rectangle
+    if ((x1 >= rectMinX && x1 <= rectMaxX && y1 >= rectMinY && y1 <= rectMaxY) ||
+        (x2 >= rectMinX && x2 <= rectMaxX && y2 >= rectMinY && y2 <= rectMaxY)) {
+      return true;
+    }
+
+    // Check line-rectangle intersection using parametric line equation
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+
+    // Check intersection with each edge of the rectangle
+    const edges = [
+      { x: rectMinX, y: rectMinY, dx: rectMaxX - rectMinX, dy: 0 }, // bottom
+      { x: rectMaxX, y: rectMinY, dx: 0, dy: rectMaxY - rectMinY }, // right
+      { x: rectMaxX, y: rectMaxY, dx: rectMinX - rectMaxX, dy: 0 }, // top
+      { x: rectMinX, y: rectMaxY, dx: 0, dy: rectMinY - rectMaxY }  // left
+    ];
+
+    for (const edge of edges) {
+      const det = dx * edge.dy - dy * edge.dx;
+      if (Math.abs(det) < 1e-10) continue; // Lines are parallel
+
+      const t = ((edge.x - x1) * edge.dy - (edge.y - y1) * edge.dx) / det;
+      const u = ((edge.x - x1) * dy - (edge.y - y1) * dx) / det;
+
+      if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+        return true; // Intersection found
+      }
+    }
+
+    return false;
   }
 
   /**

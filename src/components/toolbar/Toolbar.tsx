@@ -5,12 +5,13 @@ import { NodeCreationTool } from './NodeCreationTool';
 import { EdgeCreationTool } from './EdgeCreationTool';
 import { useKeyboardShortcuts, createDefaultShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { toolManager } from '../../core/tools/ToolManager';
+import { SelectionState } from '../../core/graph/SelectionManager';
 import '../../styles/components/toolbar.css';
 
 interface ToolbarProps {
   activeMode: CanvasMode;
   onModeChange: (mode: CanvasMode) => void;
-  selectedNodes: string[];
+  selection: SelectionState;
   canUndo?: boolean;
   canRedo?: boolean;
   onUndo?: () => void;
@@ -21,7 +22,7 @@ interface ToolbarProps {
 export const Toolbar: React.FC<ToolbarProps> = ({ 
   activeMode, 
   onModeChange, 
-  selectedNodes,
+  selection,
   canUndo = false,
   canRedo = false,
   onUndo,
@@ -39,14 +40,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       onModeChange(CanvasMode.DRAW_NODE);
     },
     deleteSelected: () => {
-      if (selectedNodes.length > 0) {
-        console.log('Delete selected nodes:', selectedNodes);
-        // TODO: Implement actual deletion when graph manager is available
+      if (selection.selectedIds.size > 0) {
+        onDeleteSelected?.();
       }
     },
     undo: () => onUndo?.(),
     redo: () => onRedo?.(),
-    selectAll: () => console.log('Select all nodes'),
+    selectAll: () => {},
   });
 
   useKeyboardShortcuts(shortcuts);
@@ -176,12 +176,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       <div className="toolbar__spacer"></div>
 
       {/* Delete Selected - positioned at the end */}
-      {selectedNodes.length > 0 && (
+      {selection.selectedIds.size > 0 && (
         <div className="toolbar__group toolbar__group--end">
           <button 
             className="toolbar__button toolbar__button--danger"
             onClick={onDeleteSelected}
-            title={`Delete ${selectedNodes.length} selected item${selectedNodes.length > 1 ? 's' : ''} (Delete)`}
+            title={`Delete ${selection.selectedIds.size} selected item${selection.selectedIds.size > 1 ? 's' : ''} (Delete)`}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M6 2h4M2 4h12M3 4l1 10h8l1-10M6 6v6M10 6v6" stroke="currentColor" strokeWidth="1.5"/>

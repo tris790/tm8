@@ -10,6 +10,8 @@ export {
   CanvasMode
 } from './enums';
 
+export type { EntityType } from './enums';
+
 // Graph types
 export type {
   Position,
@@ -34,5 +36,7 @@ export type {
   ShaderProgram,
   MouseEvent,
   WheelEvent,
-  DragEvent
+  DragEvent,
+  SelectionRectangle,
+  WorldSelectionRectangle
 } from './canvas';

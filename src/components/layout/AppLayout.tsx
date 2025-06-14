@@ -11,9 +11,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   return (
     <div className="app-layout">
       <Header 
-        onSearch={(query) => console.log('Search:', query)}
-        onFilter={() => console.log('Filter')}
-        onExport={() => console.log('Export')}
+        onSearch={(query) => {}}
+        onFilter={() => {}}
+        onExport={() => {}}
       />
       <div className="app-content">
         <main className="canvas-container">

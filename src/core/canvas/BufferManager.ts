@@ -13,6 +13,11 @@ export class BufferManager {
   private nodeGeometry!: Float32Array;
   private edgeGeometry!: Float32Array;
   private boundaryGeometry!: Float32Array;
+  private selectionRectGeometry!: Float32Array;
+  
+  // Debug logging state
+  private _lastEdgeCount?: number;
+  private _lastValidEdgeCount?: number;
 
   constructor(gl: WebGL2RenderingContext) {
     this.gl = gl;
@@ -41,6 +46,14 @@ export class BufferManager {
 
     // Boundary geometry: rectangle outline
     this.boundaryGeometry = new Float32Array([
+      0, 0,  // bottom-left
+      1, 0,  // bottom-right
+      0, 1,  // top-left
+      1, 1   // top-right
+    ]);
+
+    // Selection rectangle geometry: quad for selection box
+    this.selectionRectGeometry = new Float32Array([
       0, 0,  // bottom-left
       1, 0,  // bottom-right
       0, 1,  // top-left
@@ -118,10 +131,12 @@ export class BufferManager {
    * Generate edge instance data for rendering
    */
   generateEdgeInstanceData(edges: Edge[], nodes: Node[], selectedIds: Set<string>): Float32Array {
+    
     const validEdges = edges.filter(edge => 
       nodes.some(n => n.id === edge.source) && 
       edge.targets.some(t => nodes.some(n => n.id === t))
     );
+    
     
     // Calculate total segments (each edge can have multiple targets)
     let totalSegments = 0;
@@ -156,7 +171,9 @@ export class BufferManager {
         instanceData[offset++] = color[2];
         
         // Thickness (1 float)
-        instanceData[offset++] = edge.properties.thickness || 2.0;
+        const thickness = edge.properties.thickness || 2.0;
+        instanceData[offset++] = thickness;
+        
         
         // Selected (1 float)
         instanceData[offset++] = selectedIds.has(edge.id) ? 1.0 : 0.0;
@@ -217,6 +234,36 @@ export class BufferManager {
   }
 
   /**
+   * Get static geometry for selection rectangle
+   */
+  getSelectionRectGeometry(): Float32Array {
+    return this.selectionRectGeometry;
+  }
+
+  /**
+   * Generate selection rectangle instance data for rendering
+   */
+  generateSelectionRectInstanceData(startX: number, startY: number, endX: number, endY: number): Float32Array {
+    // Calculate rectangle position and size in world coordinates
+    const minX = Math.min(startX, endX);
+    const minY = Math.min(startY, endY);
+    const width = Math.abs(endX - startX);
+    const height = Math.abs(endY - startY);
+
+    const instanceData = new Float32Array(4); // 4 floats per instance
+    
+    // Position (2 floats) - bottom-left corner
+    instanceData[0] = minX;
+    instanceData[1] = minY;
+    
+    // Size (2 floats)
+    instanceData[2] = width;
+    instanceData[3] = height;
+    
+    return instanceData;
+  }
+
+  /**
    * Get buffer by name
    */
   getBuffer(name: string): BufferInfo | undefined {
@@ -250,34 +297,23 @@ export class BufferManager {
    * Get node color based on type
    */
   private getNodeColor(type: NodeType): [number, number, number] {
-    switch (type) {
-      case NodeType.PROCESS: return [0.231, 0.510, 0.965]; // blue-500
-      case NodeType.DATASTORE: return [0.132, 0.651, 0.368]; // green-500
-      case NodeType.EXTERNAL_ENTITY: return [0.910, 0.361, 0.361]; // red-500
-      case NodeType.SERVICE: return [0.645, 0.365, 0.925]; // purple-500
-      default: return [0.5, 0.5, 0.5]; // gray
-    }
+    // All nodes are primary blue (#3b82f6)
+    return [0.231, 0.510, 0.965]; // blue-500
   }
 
   /**
    * Get edge color based on type
    */
   private getEdgeColor(type: string): [number, number, number] {
-    switch (type) {
-      case 'https': return [0.067, 0.725, 0.506]; // emerald-500
-      case 'grpc': return [0.251, 0.631, 0.894]; // sky-500
-      default: return [0.475, 0.569, 0.698]; // slate-400
-    }
+    // All edges are amber (#FF9F00)
+    return [1.0, 0.624, 0.0]; // amber
   }
 
   /**
    * Get boundary color based on type
    */
   private getBoundaryColor(type: string): [number, number, number] {
-    switch (type) {
-      case 'trust-boundary': return [0.956, 0.396, 0.129]; // orange-500
-      case 'network-zone': return [0.792, 0.243, 0.957]; // violet-500
-      default: return [0.6, 0.6, 0.6]; // gray
-    }
+    // All boundaries are dark red (#CB0404)
+    return [0.796, 0.016, 0.016]; // dark red
   }
 }

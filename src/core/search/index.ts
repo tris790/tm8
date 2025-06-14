@@ -4,6 +4,7 @@
  */
 
 export { SearchEngine } from './SearchEngine';
+export { SimpleSearchEngine } from './SimpleSearchEngine';
 export { FilterEngine } from './FilterEngine';
 
 export type {
@@ -12,6 +13,11 @@ export type {
   SearchOptions,
   SearchField
 } from './SearchEngine';
+
+export type {
+  SimpleSearchResult,
+  SimpleSearchOptions
+} from './SimpleSearchEngine';
 
 export type {
   FilterOptions,

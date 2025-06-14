@@ -94,3 +94,25 @@ export interface DragEvent extends MouseEvent {
   worldDeltaX: number;
   worldDeltaY: number;
 }
+
+/**
+ * Selection rectangle for multi-select operations
+ */
+export interface SelectionRectangle {
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  isActive: boolean;
+}
+
+/**
+ * Selection rectangle in world coordinates
+ */
+export interface WorldSelectionRectangle {
+  startWorldX: number;
+  startWorldY: number;
+  endWorldX: number;
+  endWorldY: number;
+  isActive: boolean;
+}

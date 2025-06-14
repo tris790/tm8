@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
+import { SearchBar } from '../search/SearchBar';
+import { SearchResults } from '../search/SearchResults';
+import { SearchResult } from '../../core/search/SearchEngine';
 import '../../styles/components/header.css';
 
 interface HeaderProps {
@@ -8,7 +10,9 @@ interface HeaderProps {
   onImport: () => void;
   onExport: () => void;
   searchQuery: string;
-  searchResults: any[];
+  searchResults: SearchResult[];
+  onSelectSearchResult?: (entityId: string) => void;
+  isSearching?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -16,11 +20,37 @@ export const Header: React.FC<HeaderProps> = ({
   onImport, 
   onExport, 
   searchQuery, 
-  searchResults 
+  searchResults,
+  onSelectSearchResult,
+  isSearching = false
 }) => {
+  const [showResults, setShowResults] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleSearchChange = (value: string) => {
-    onSearch(value);
+  // Show results when there's a query and results exist
+  useEffect(() => {
+    setShowResults(searchQuery.trim().length > 0 && searchResults.length > 0);
+  }, [searchQuery, searchResults]);
+
+  // Handle clicking outside search to close results
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSearchResultSelect = (entityId: string) => {
+    setShowResults(false);
+    onSelectSearchResult?.(entityId);
+  };
+
+  const handleSearchResultsClose = () => {
+    setShowResults(false);
   };
 
   return (
@@ -38,19 +68,25 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
       
       <div className="header-center">
-        <div className="search-section">
-          <Input
-            type="search"
-            placeholder="Search nodes, edges, properties..."
+        <div className="search-section" ref={searchContainerRef}>
+          <SearchBar
+            onSearch={onSearch}
+            placeholder="Search nodes, edges, boundaries..."
             value={searchQuery}
-            onChange={handleSearchChange}
-            icon={
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M7.333 12.667A5.333 5.333 0 1 0 7.333 2a5.333 5.333 0 0 0 0 10.667zM14 14l-2.9-2.9" 
-                      stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            }
+            isSearching={isSearching}
           />
+          {showResults && (
+            <div className="search-results-overlay">
+              <SearchResults
+                results={searchResults}
+                onSelect={handleSearchResultSelect}
+                onClose={handleSearchResultsClose}
+                maxHeight={400}
+                showScores={false}
+                groupByType={true}
+              />
+            </div>
+          )}
         </div>
       </div>
       

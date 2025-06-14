@@ -22,6 +22,18 @@ export class Camera {
   public _instanceId: string = Math.random().toString(36).substr(2, 9);
   private lastPanLogTime: number = 0;
 
+  // Animation state
+  private _isAnimating: boolean = false;
+  private _animationStartTime: number = 0;
+  private _animationDuration: number = 500; // ms
+  private _startZoom: number = 1;
+  private _startPanX: number = 0;
+  private _startPanY: number = 0;
+  private _targetZoom: number = 1;
+  private _targetPanX: number = 0;
+  private _targetPanY: number = 0;
+  private _onAnimationUpdate?: () => void;
+
   constructor() {
     // Initialize with very zoomed out view and center on demo graph
     this._zoom = 0.002; // Start very zoomed out
@@ -241,6 +253,87 @@ export class Camera {
     this._panY = 200;  // Center on demo graph
     this._isDirty = true;
   }
+
+  /**
+   * Easing function for smooth animations
+   */
+  private easeInOutCubic(t: number): number {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  /**
+   * Stop any current animation
+   */
+  stopAnimation(): void {
+    this._isAnimating = false;
+  }
+
+  /**
+   * Check if camera is currently animating
+   */
+  get isAnimating(): boolean {
+    return this._isAnimating;
+  }
+
+  /**
+   * Set animation update callback (called by WebGL renderer)
+   */
+  setAnimationUpdateCallback(callback: () => void): void {
+    this._onAnimationUpdate = callback;
+  }
+
+  /**
+   * Animate camera to a specific position and zoom level
+   */
+  animateTo(targetPanX: number, targetPanY: number, targetZoom?: number, duration: number = 500): void {
+    this.stopAnimation();
+
+    this._startZoom = this._zoom;
+    this._startPanX = this._panX;
+    this._startPanY = this._panY;
+    this._targetZoom = targetZoom !== undefined ? Math.max(this.MIN_ZOOM, Math.min(this.MAX_ZOOM, targetZoom)) : this._zoom;
+    this._targetPanX = targetPanX;
+    this._targetPanY = targetPanY;
+    this._animationDuration = duration;
+    this._animationStartTime = performance.now();
+    this._isAnimating = true;
+  }
+
+  /**
+   * Animate camera to focus on a specific world position
+   */
+  animateToPosition(worldX: number, worldY: number, targetZoom?: number, duration: number = 500): void {
+    const zoom = targetZoom !== undefined ? targetZoom : Math.max(this._zoom, 0.5);
+    this.animateTo(worldX, worldY, zoom, duration);
+  }
+
+  /**
+   * Update animation (called by WebGL renderer each frame)
+   */
+  updateAnimation(currentTime: number): boolean {
+    if (!this._isAnimating) return false;
+
+    const elapsed = currentTime - this._animationStartTime;
+    const progress = Math.min(elapsed / this._animationDuration, 1);
+    const easedProgress = this.easeInOutCubic(progress);
+
+    // Interpolate values
+    this._zoom = this._startZoom + (this._targetZoom - this._startZoom) * easedProgress;
+    this._panX = this._startPanX + (this._targetPanX - this._startPanX) * easedProgress;
+    this._panY = this._startPanY + (this._targetPanY - this._startPanY) * easedProgress;
+    this._isDirty = true;
+
+    if (progress >= 1) {
+      this._isAnimating = false;
+    }
+
+    // Trigger re-render if callback is set
+    if (this._onAnimationUpdate) {
+      this._onAnimationUpdate();
+    }
+
+    return this._isAnimating;
+  };
 
   /**
    * Update transformation matrices

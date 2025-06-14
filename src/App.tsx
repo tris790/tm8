@@ -16,6 +16,7 @@ import { createDemoGraph } from '@/utils/demoGraph';
 import { Node, CanvasMode } from '@/core/types';
 import { NodeType, EdgeType, BoundaryType } from '@/core/types/enums';
 import { toolManager } from '@/core/tools/ToolManager';
+import { Camera } from '@/core/canvas';
 
 interface AppProps {}
 
@@ -23,17 +24,14 @@ const App: React.FC<AppProps> = () => {
   // Global application state
   const {
     graph,
-    selectedNodes,
-    selectedEdges,
-    selectedBoundaries,
+    selection,
     canvasMode,
     isLoading,
     error,
     updateGraph,
+    updateGraphSilent,
     loadGraph,
-    setSelectedNodes,
-    setSelectedEdges,
-    setSelectedBoundaries,
+    selectEntity,
     setCanvasMode: originalSetCanvasMode,
     clearSelection,
     selectAll,
@@ -41,6 +39,8 @@ const App: React.FC<AppProps> = () => {
     redo,
     canUndo,
     canRedo,
+    startDrag,
+    endDrag,
     resetError
   } = useAppState();
 
@@ -52,7 +52,8 @@ const App: React.FC<AppProps> = () => {
     results,
     setQuery,
     clearSearch,
-    finalResults
+    finalResults,
+    isSearching
   } = useSearch(graph);
 
   // File operations
@@ -90,6 +91,9 @@ const App: React.FC<AppProps> = () => {
 
   // Canvas reference for exports
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  // Camera reference for animations
+  const cameraRef = useRef<Camera | null>(null);
 
   // File operation handlers
   const handleImportFile = useCallback(async () => {
@@ -127,6 +131,60 @@ const App: React.FC<AppProps> = () => {
     }
   }, []);
 
+  // Handle camera ready
+  const handleCameraReady = useCallback((camera: Camera) => {
+    cameraRef.current = camera;
+  }, []);
+
+  // Handle search result selection
+  const handleSearchResultSelect = useCallback((entityId: string) => {
+    // Find the entity in the graph for notification and position
+    const node = graph.nodes.find(n => n.id === entityId);
+    const edge = graph.edges.find(e => e.id === entityId);
+    const boundary = graph.boundaries.find(b => b.id === entityId);
+
+    // Use centralized selection manager
+    selectEntity(entityId);
+
+    // Animate camera to entity position
+    if (cameraRef.current) {
+      let targetX = 0, targetY = 0;
+      
+      if (node) {
+        targetX = node.position.x;
+        targetY = node.position.y;
+      } else if (boundary) {
+        targetX = boundary.position.x + boundary.bounds.width / 2;
+        targetY = boundary.position.y + boundary.bounds.height / 2;
+      } else if (edge) {
+        // For edges, find center between source and first target
+        const sourceNode = graph.nodes.find(n => n.id === edge.source);
+        const targetNode = graph.nodes.find(n => n.id === edge.targets[0]);
+        if (sourceNode && targetNode) {
+          targetX = (sourceNode.position.x + targetNode.position.x) / 2;
+          targetY = (sourceNode.position.y + targetNode.position.y) / 2;
+        }
+      }
+      
+      // Animate camera to entity with a slight zoom increase
+      const currentZoom = cameraRef.current.zoom;
+      const targetZoom = Math.min(currentZoom * 1.5, 0.01); // Increase zoom by 50% but cap at 0.01
+      cameraRef.current.animateToPosition(targetX, targetY, targetZoom, 800);
+    }
+
+    // Clear search to hide results
+    clearSearch();
+    
+    // Show notification about selection
+    const entityType = node ? 'node' : edge ? 'edge' : 'boundary';
+    const entityName = node?.name || boundary?.name || `${edge?.source} → ${edge?.targets.join(', ')}`;
+    window.showNotification?.({ 
+      type: 'info', 
+      title: `Selected ${entityType}`,
+      message: entityName
+    });
+  }, [graph, selectEntity, clearSearch]);
+
   // Shortcut help state
   const [showShortcutHelp, setShowShortcutHelp] = useState(false);
 
@@ -135,7 +193,6 @@ const App: React.FC<AppProps> = () => {
   // Node creation handlers
   const createNode = useCallback((type: string) => {
     // TODO: Implement node creation based on type
-    console.log('Create node:', type);
   }, []);
 
   const handleNodeCreate = useCallback((x: number, y: number) => {
@@ -167,9 +224,7 @@ const App: React.FC<AppProps> = () => {
     updateGraph(updatedGraph);
     
     // Select the newly created node and focus name field
-    setSelectedNodes([nodeId]);
-    setSelectedEdges([]);
-    setSelectedBoundaries([]);
+    selectEntity(nodeId);
     
     // Focus first available field after a brief delay to allow component to render
     setTimeout(() => {
@@ -183,7 +238,7 @@ const App: React.FC<AppProps> = () => {
         }
       }
     }, 300);
-  }, [graph, updateGraph, setSelectedNodes, setSelectedEdges, setSelectedBoundaries]);
+  }, [graph, updateGraph, selectEntity]);
 
   const handleEdgeCreate = useCallback((sourceNodeId: string, targetNodeId: string) => {
     // Generate unique edge ID
@@ -214,9 +269,7 @@ const App: React.FC<AppProps> = () => {
     updateGraph(updatedGraph);
     
     // Select the newly created edge and focus type field (edges don't have names)
-    setSelectedNodes([]);
-    setSelectedEdges([edgeId]);
-    setSelectedBoundaries([]);
+    selectEntity(edgeId);
     
     // Focus first available field after a brief delay to allow component to render
     setTimeout(() => {
@@ -229,7 +282,7 @@ const App: React.FC<AppProps> = () => {
         }
       }
     }, 300);
-  }, [graph, updateGraph, setSelectedNodes, setSelectedEdges, setSelectedBoundaries]);
+  }, [graph, updateGraph, selectEntity]);
 
   const handleBoundaryCreate = useCallback((x: number, y: number, width: number, height: number) => {
     // Generate unique boundary ID
@@ -258,9 +311,7 @@ const App: React.FC<AppProps> = () => {
     updateGraph(updatedGraph);
     
     // Select the newly created boundary and focus name field
-    setSelectedNodes([]);
-    setSelectedEdges([]);
-    setSelectedBoundaries([boundaryId]);
+    selectEntity(boundaryId);
     
     // Focus first available field after a brief delay to allow component to render
     setTimeout(() => {
@@ -274,16 +325,16 @@ const App: React.FC<AppProps> = () => {
         }
       }
     }, 300);
-  }, [graph, updateGraph, setSelectedNodes, setSelectedEdges, setSelectedBoundaries]);
+  }, [graph, updateGraph, selectEntity]);
 
   const deleteSelected = useCallback(() => {
-    if (selectedNodes.length > 0 || selectedEdges.length > 0 || selectedBoundaries.length > 0) {
+    if (selection.selectedIds.size > 0) {
       // Create updated graph with selected items removed
       const updatedGraph = {
         ...graph,
-        nodes: graph.nodes.filter(node => !selectedNodes.includes(node.id)),
-        edges: graph.edges.filter(edge => !selectedEdges.includes(edge.id)),
-        boundaries: graph.boundaries.filter(boundary => !selectedBoundaries.includes(boundary.id)),
+        nodes: graph.nodes.filter(node => !selection.selectedIds.has(node.id)),
+        edges: graph.edges.filter(edge => !selection.selectedIds.has(edge.id)),
+        boundaries: graph.boundaries.filter(boundary => !selection.selectedIds.has(boundary.id)),
         metadata: {
           ...graph.metadata,
           modified: new Date()
@@ -292,8 +343,8 @@ const App: React.FC<AppProps> = () => {
 
       // Remove edges connected to deleted nodes
       const remainingEdges = updatedGraph.edges.filter(edge => {
-        return !selectedNodes.includes(edge.source) && 
-               !edge.targets.some(target => selectedNodes.includes(target));
+        return !selection.selectedIds.has(edge.source) && 
+               !edge.targets.some(target => selection.selectedIds.has(target));
       });
       updatedGraph.edges = remainingEdges;
 
@@ -301,14 +352,14 @@ const App: React.FC<AppProps> = () => {
       clearSelection();
       
       // Show notification about deletion
-      const deletedCount = selectedNodes.length + selectedEdges.length + selectedBoundaries.length;
+      const deletedCount = selection.selectedIds.size;
       window.showNotification?.({ 
         type: 'success', 
         title: `Deleted ${deletedCount} item${deletedCount !== 1 ? 's' : ''}`,
-        message: `${selectedNodes.length} nodes, ${selectedEdges.length} edges, ${selectedBoundaries.length} boundaries`
+        message: `${selection.selectedNodes.length} nodes, ${selection.selectedEdges.length} edges, ${selection.selectedBoundaries.length} boundaries`
       });
     }
-  }, [selectedNodes, selectedEdges, selectedBoundaries, clearSelection, graph, updateGraph]);
+  }, [selection, clearSelection, graph, updateGraph]);
 
   // Keyboard shortcuts
   const shortcutHandlers = {
@@ -370,13 +421,15 @@ const App: React.FC<AppProps> = () => {
         onExport={handleExportFile}
         searchQuery={query}
         searchResults={finalResults}
+        onSelectSearchResult={handleSearchResultSelect}
+        isSearching={isSearching}
       />
       
       <div className="app-content">
         <Toolbar 
           activeMode={canvasMode}
           onModeChange={setCanvasMode}
-          selectedNodes={selectedNodes}
+          selection={selection}
           canUndo={canUndo}
           canRedo={canRedo}
           onUndo={undo}
@@ -388,57 +441,112 @@ const App: React.FC<AppProps> = () => {
           graph={graph}
           mode={canvasMode}
           onNodeSelect={(nodeId, addToSelection) => {
-            if (addToSelection) {
-              const newSelection = selectedNodes.includes(nodeId) 
-                ? selectedNodes.filter(id => id !== nodeId)
-                : [...selectedNodes, nodeId];
-              setSelectedNodes(newSelection);
-            } else {
-              // Clear all other selections when not adding to selection
-              setSelectedNodes([nodeId]);
-              setSelectedEdges([]);
-              setSelectedBoundaries([]);
-            }
+            selectEntity(nodeId, addToSelection);
           }}
           onEdgeSelect={(edgeId, addToSelection) => {
-            if (addToSelection) {
-              const newSelection = selectedEdges.includes(edgeId) 
-                ? selectedEdges.filter(id => id !== edgeId)
-                : [...selectedEdges, edgeId];
-              setSelectedEdges(newSelection);
-            } else {
-              // Clear all other selections when not adding to selection
-              setSelectedNodes([]);
-              setSelectedEdges([edgeId]);
-              setSelectedBoundaries([]);
-            }
+            selectEntity(edgeId, addToSelection);
           }}
           onBoundarySelect={(boundaryId, addToSelection) => {
-            if (addToSelection) {
-              const newSelection = selectedBoundaries.includes(boundaryId) 
-                ? selectedBoundaries.filter(id => id !== boundaryId)
-                : [...selectedBoundaries, boundaryId];
-              setSelectedBoundaries(newSelection);
-            } else {
-              // Clear all other selections when not adding to selection
-              setSelectedNodes([]);
-              setSelectedEdges([]);
-              setSelectedBoundaries([boundaryId]);
-            }
+            selectEntity(boundaryId, addToSelection);
           }}
           onDeselectAll={() => {
             clearSelection();
+          }}
+          onNodeUpdate={(nodeId, updates) => {
+            if (!graph) return;
+            const updatedNodes = graph.nodes.map(node => 
+              node.id === nodeId ? { ...node, ...updates } : node
+            );
+            updateGraph({ ...graph, nodes: updatedNodes });
+          }}
+          onNodeUpdateSilent={(nodeId, updates) => {
+            if (!graph) return;
+            const updatedNodes = graph.nodes.map(node => 
+              node.id === nodeId ? { ...node, ...updates } : node
+            );
+            updateGraphSilent({ ...graph, nodes: updatedNodes });
+          }}
+          onBoundaryUpdate={(boundaryId, updates) => {
+            if (!graph) return;
+            const updatedBoundaries = graph.boundaries.map(boundary => 
+              boundary.id === boundaryId ? { ...boundary, ...updates } : boundary
+            );
+            updateGraph({ ...graph, boundaries: updatedBoundaries });
+          }}
+          onBoundaryUpdateSilent={(boundaryId, updates) => {
+            if (!graph) return;
+            const updatedBoundaries = graph.boundaries.map(boundary => 
+              boundary.id === boundaryId ? { ...boundary, ...updates } : boundary
+            );
+            updateGraphSilent({ ...graph, boundaries: updatedBoundaries });
+          }}
+          onMultiEntityUpdate={(nodeUpdates, boundaryUpdates) => {
+            if (!graph) return;
+            
+            // Apply all node updates in a single operation
+            let updatedNodes = graph.nodes;
+            if (nodeUpdates.length > 0) {
+              updatedNodes = graph.nodes.map(node => {
+                const update = nodeUpdates.find(u => u.id === node.id);
+                return update ? { ...node, ...update.updates } : node;
+              });
+            }
+            
+            // Apply all boundary updates in a single operation
+            let updatedBoundaries = graph.boundaries;
+            if (boundaryUpdates.length > 0) {
+              updatedBoundaries = graph.boundaries.map(boundary => {
+                const update = boundaryUpdates.find(u => u.id === boundary.id);
+                return update ? { ...boundary, ...update.updates } : boundary;
+              });
+            }
+            
+            // Single graph update with all changes
+            updateGraph({
+              ...graph,
+              nodes: updatedNodes,
+              boundaries: updatedBoundaries
+            });
+          }}
+          onMultiEntityUpdateSilent={(nodeUpdates, boundaryUpdates) => {
+            if (!graph) return;
+            
+            // Apply all node updates in a single operation
+            let updatedNodes = graph.nodes;
+            if (nodeUpdates.length > 0) {
+              updatedNodes = graph.nodes.map(node => {
+                const update = nodeUpdates.find(u => u.id === node.id);
+                return update ? { ...node, ...update.updates } : node;
+              });
+            }
+            
+            // Apply all boundary updates in a single operation
+            let updatedBoundaries = graph.boundaries;
+            if (boundaryUpdates.length > 0) {
+              updatedBoundaries = graph.boundaries.map(boundary => {
+                const update = boundaryUpdates.find(u => u.id === boundary.id);
+                return update ? { ...boundary, ...update.updates } : boundary;
+              });
+            }
+            
+            // Single silent graph update with all changes
+            updateGraphSilent({
+              ...graph,
+              nodes: updatedNodes,
+              boundaries: updatedBoundaries
+            });
           }}
           onNodeCreate={handleNodeCreate}
           onEdgeCreate={handleEdgeCreate}
           onBoundaryCreate={handleBoundaryCreate}
           onModeChange={setCanvasMode}
+          onDragStart={startDrag}
+          onDragEnd={endDrag}
+          onCameraReady={handleCameraReady}
         />
         
         <Sidebar 
-          selectedNodes={selectedNodes}
-          selectedEdges={selectedEdges}
-          selectedBoundaries={selectedBoundaries}
+          selection={selection}
           graph={graph}
           onUpdateNode={(id, updates) => {
             if (!graph) return;

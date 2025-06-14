@@ -8,12 +8,11 @@ import { Graph, CanvasMode } from '../core/types';
 import { StorageManager } from '../core/io/StorageManager';
 import { AutoSave } from '../core/io/AutoSave';
 import { GraphHistory } from '../core/graph/GraphHistory';
+import { selectionManager, SelectionState } from '../core/graph/SelectionManager';
 
 export interface AppState {
   graph: Graph;
-  selectedNodes: string[];
-  selectedEdges: string[];
-  selectedBoundaries: string[];
+  selection: SelectionState;
   canvasMode: CanvasMode;
   isLoading: boolean;
   error: string | null;
@@ -24,15 +23,15 @@ export interface AppState {
 export interface UseAppStateResult extends AppState {
   // Graph operations
   updateGraph: (updates: Partial<Graph>) => void;
+  updateGraphSilent: (updates: Partial<Graph>) => void; // Update without history snapshot
   loadGraph: (graph: Graph) => void;
   resetGraph: () => void;
   
-  // Selection operations
-  setSelectedNodes: (nodes: string[]) => void;
-  setSelectedEdges: (edges: string[]) => void;
-  setSelectedBoundaries: (boundaries: string[]) => void;
+  // Selection operations (delegated to SelectionManager)
+  selectEntity: (entityId: string, addToSelection?: boolean) => void;
   clearSelection: () => void;
   selectAll: () => void;
+  isSelected: (entityId: string) => boolean;
   
   // UI state operations
   setCanvasMode: (mode: CanvasMode) => void;
@@ -46,6 +45,10 @@ export interface UseAppStateResult extends AppState {
   redo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  
+  // Drag operations
+  startDrag: () => void;
+  endDrag: () => void;
   
   // Utility functions
   getSelectionCount: () => number;
@@ -70,9 +73,12 @@ const createEmptyGraph = (): Graph => ({
 
 const createEmptyState = (): AppState => ({
   graph: createEmptyGraph(),
-  selectedNodes: [],
-  selectedEdges: [],
-  selectedBoundaries: [],
+  selection: {
+    selectedIds: new Set(),
+    selectedNodes: [],
+    selectedEdges: [],
+    selectedBoundaries: []
+  },
   canvasMode: CanvasMode.SELECT,
   isLoading: false,
   error: null,
@@ -87,6 +93,18 @@ export const useAppState = (): UseAppStateResult => {
   const storageManager = useRef(new StorageManager());
   const autoSave = useRef(new AutoSave(storageManager.current));
   const history = useRef(new GraphHistory());
+  
+  // Selection state sync
+  useEffect(() => {
+    const unsubscribe = selectionManager.subscribe((selectionState) => {
+      setState(prev => ({ ...prev, selection: selectionState }));
+    });
+    return unsubscribe;
+  }, []);
+  
+  // Drag state management
+  const isDragging = useRef(false);
+  const dragStartGraph = useRef<Graph | null>(null);
 
   // Initialize with auto-saved data
   useEffect(() => {
@@ -150,10 +168,29 @@ export const useAppState = (): UseAppStateResult => {
       // Update auto-save
       autoSave.current.updateGraph(newGraph);
       
-      // Add to history if this is a significant change
+      // Add to history if this is a significant change and we're not in the middle of a drag
       if (updates.nodes || updates.edges || updates.boundaries) {
-        history.current.snapshot(newGraph);
+        if (!isDragging.current) {
+          history.current.snapshot(newGraph);
+        }
       }
+      
+      return {
+        ...prev,
+        graph: newGraph
+      };
+    });
+  }, []);
+
+  // Silent update without history snapshot (used during drag operations)
+  const updateGraphSilent = useCallback((updates: Partial<Graph>) => {
+    setState(prev => {
+      const newGraph = { ...prev.graph, ...updates };
+      
+      // Update auto-save
+      autoSave.current.updateGraph(newGraph);
+      
+      // No history snapshot for silent updates
       
       return {
         ...prev,
@@ -166,12 +203,13 @@ export const useAppState = (): UseAppStateResult => {
     setState(prev => ({
       ...prev,
       graph,
-      selectedNodes: [],
-      selectedEdges: [],
-      selectedBoundaries: [],
       canvasMode: CanvasMode.SELECT,
       error: null
     }));
+    
+    // Update selection manager with new graph
+    selectionManager.setGraph(graph);
+    selectionManager.clearSelection();
     
     // Reset history with new graph
     history.current.clear();
@@ -183,35 +221,21 @@ export const useAppState = (): UseAppStateResult => {
     loadGraph(emptyGraph);
   }, [loadGraph]);
 
-  // Selection operations
-  const setSelectedNodes = useCallback((nodes: string[]) => {
-    setState(prev => ({ ...prev, selectedNodes: nodes }));
-  }, []);
-
-  const setSelectedEdges = useCallback((edges: string[]) => {
-    setState(prev => ({ ...prev, selectedEdges: edges }));
-  }, []);
-
-  const setSelectedBoundaries = useCallback((boundaries: string[]) => {
-    setState(prev => ({ ...prev, selectedBoundaries: boundaries }));
+  // Selection operations (delegated to SelectionManager)
+  const selectEntity = useCallback((entityId: string, addToSelection: boolean = false) => {
+    selectionManager.handleEntitySelect(entityId, addToSelection);
   }, []);
 
   const clearSelection = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      selectedNodes: [],
-      selectedEdges: [],
-      selectedBoundaries: []
-    }));
+    selectionManager.clearSelection();
   }, []);
 
   const selectAll = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      selectedNodes: prev.graph.nodes.map(n => n.id),
-      selectedEdges: prev.graph.edges.map(e => e.id),
-      selectedBoundaries: prev.graph.boundaries.map(b => b.id)
-    }));
+    selectionManager.selectAll();
+  }, []);
+
+  const isSelected = useCallback((entityId: string) => {
+    return selectionManager.isSelected(entityId);
   }, []);
 
   // UI state operations
@@ -239,57 +263,95 @@ export const useAppState = (): UseAppStateResult => {
     setState(prev => ({ ...prev, error: null }));
   }, []);
 
+  // Drag operations
+  const startDrag = useCallback(() => {
+    if (!isDragging.current) {
+      isDragging.current = true;
+      // Store the graph state before drag starts, but don't create snapshot yet
+      dragStartGraph.current = JSON.parse(JSON.stringify(state.graph));
+    }
+  }, [state.graph]);
+
+  const endDrag = useCallback(() => {
+    if (isDragging.current) {
+      isDragging.current = false;
+      // Only now create the history snapshots - one for before drag, one for after
+      if (dragStartGraph.current) {
+        history.current.snapshot(dragStartGraph.current);
+        history.current.snapshot(state.graph);
+      }
+      dragStartGraph.current = null;
+    }
+  }, [state.graph]);
+
   // History operations
   const undo = useCallback(() => {
-    const previousGraph = history.current.undo();
-    if (previousGraph) {
+    const previousSnapshot = history.current.undo();
+    if (previousSnapshot) {
+      // Convert GraphSnapshot to Graph by preserving metadata
+      const previousGraph: Graph = {
+        ...previousSnapshot,
+        metadata: state.graph.metadata // Preserve current metadata
+      };
       setState(prev => ({
         ...prev,
-        graph: previousGraph,
-        selectedNodes: [],
-        selectedEdges: [],
-        selectedBoundaries: []
+        graph: previousGraph
       }));
+      // Update selection manager and clear selection on undo
+      selectionManager.setGraph(previousGraph);
+      selectionManager.clearSelection();
       autoSave.current.updateGraph(previousGraph);
     }
-  }, []);
+  }, [state.graph.metadata]);
 
   const redo = useCallback(() => {
-    const nextGraph = history.current.redo();
-    if (nextGraph) {
+    const nextSnapshot = history.current.redo();
+    if (nextSnapshot) {
+      // Convert GraphSnapshot to Graph by preserving metadata
+      const nextGraph: Graph = {
+        ...nextSnapshot,
+        metadata: state.graph.metadata // Preserve current metadata
+      };
       setState(prev => ({
         ...prev,
-        graph: nextGraph,
-        selectedNodes: [],
-        selectedEdges: [],
-        selectedBoundaries: []
+        graph: nextGraph
       }));
+      // Update selection manager and clear selection on redo
+      selectionManager.setGraph(nextGraph);
+      selectionManager.clearSelection();
       autoSave.current.updateGraph(nextGraph);
     }
-  }, []);
+  }, [state.graph.metadata]);
 
   const canUndo = history.current.canUndo();
   const canRedo = history.current.canRedo();
 
   // Utility functions
   const getSelectionCount = useCallback(() => {
-    return state.selectedNodes.length + state.selectedEdges.length + state.selectedBoundaries.length;
-  }, [state.selectedNodes, state.selectedEdges, state.selectedBoundaries]);
+    return selectionManager.getSelectionCount();
+  }, []);
 
   const hasSelection = useCallback(() => {
-    return getSelectionCount() > 0;
-  }, [getSelectionCount]);
+    return selectionManager.hasSelection();
+  }, []);
+  
+  // Initialize selection manager with initial graph
+  useEffect(() => {
+    if (state.graph) {
+      selectionManager.setGraph(state.graph);
+    }
+  }, [state.graph]);
 
   return {
     ...state,
     updateGraph,
+    updateGraphSilent,
     loadGraph,
     resetGraph,
-    setSelectedNodes,
-    setSelectedEdges,
-    setSelectedBoundaries,
+    selectEntity,
     clearSelection,
     selectAll,
+    isSelected,
     setCanvasMode,
     setZoom,
     setPanOffset,
@@ -300,6 +362,8 @@ export const useAppState = (): UseAppStateResult => {
     redo,
     canUndo,
     canRedo,
+    startDrag,
+    endDrag,
     getSelectionCount,
     hasSelection
   };

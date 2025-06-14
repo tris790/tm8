@@ -5,8 +5,9 @@
 import { Graph, RenderStats, ShaderProgram, Node as GraphNode, Edge, Boundary } from '../types';
 import { Camera } from './Camera';
 import { BufferManager } from './BufferManager';
-import { nodeShaders, edgeShaders, boundaryShaders, createProgram } from './Shaders';
+import { nodeShaders, edgeShaders, boundaryShaders, selectionRectShaders, createProgram } from './Shaders';
 import { TextRenderer } from './TextRenderer';
+import { selectionManager } from '../graph/SelectionManager';
 
 export class WebGLRenderer {
   private gl: WebGL2RenderingContext;
@@ -18,9 +19,18 @@ export class WebGLRenderer {
   private nodeProgram: ShaderProgram | null = null;
   private edgeProgram: ShaderProgram | null = null;
   private boundaryProgram: ShaderProgram | null = null;
+  private selectionRectProgram: ShaderProgram | null = null;
   
   // Rendering state
   private selectedIds: Set<string> = new Set();
+  private lastGraph: Graph | null = null;
+  private selectionRect: { startX: number; startY: number; endX: number; endY: number; isActive: boolean } = {
+    startX: 0,
+    startY: 0,
+    endX: 0,
+    endY: 0,
+    isActive: false
+  };
   private stats: RenderStats = {
     frameTime: 0,
     drawCalls: 0,
@@ -28,6 +38,9 @@ export class WebGLRenderer {
     visibleNodes: 0,
     visibleEdges: 0
   };
+  
+  // Debug state
+  private _lastInstanceCount?: number;
   
   // Animation
   private startTime: number = Date.now();
@@ -59,6 +72,7 @@ export class WebGLRenderer {
     this.initializeWebGL();
     this.createShaderPrograms();
     this.setupEventListeners(canvas);
+    this.setupSelectionSync();
   }
 
   /**
@@ -90,6 +104,7 @@ export class WebGLRenderer {
 
     // Node shader program
     const nodeProgram = createProgram(gl, nodeShaders);
+    const selectedAttrLocation = gl.getAttribLocation(nodeProgram, 'a_selected');
     this.nodeProgram = {
       program: nodeProgram,
       attributes: {
@@ -98,7 +113,7 @@ export class WebGLRenderer {
         a_instanceType: gl.getAttribLocation(nodeProgram, 'a_instanceType'),
         a_instanceColor: gl.getAttribLocation(nodeProgram, 'a_instanceColor'),
         a_instanceScale: gl.getAttribLocation(nodeProgram, 'a_instanceScale'),
-        a_selected: gl.getAttribLocation(nodeProgram, 'a_selected')
+        a_selected: selectedAttrLocation
       },
       uniforms: {
         u_viewMatrix: gl.getUniformLocation(nodeProgram, 'u_viewMatrix')!,
@@ -145,6 +160,22 @@ export class WebGLRenderer {
         u_dashSize: gl.getUniformLocation(boundaryProgram, 'u_dashSize')!
       }
     };
+
+    // Selection rectangle shader program
+    const selectionRectProgram = createProgram(gl, selectionRectShaders);
+    this.selectionRectProgram = {
+      program: selectionRectProgram,
+      attributes: {
+        a_position: gl.getAttribLocation(selectionRectProgram, 'a_position'),
+        a_rectPos: gl.getAttribLocation(selectionRectProgram, 'a_rectPos'),
+        a_rectSize: gl.getAttribLocation(selectionRectProgram, 'a_rectSize')
+      },
+      uniforms: {
+        u_viewMatrix: gl.getUniformLocation(selectionRectProgram, 'u_viewMatrix')!,
+        u_projectionMatrix: gl.getUniformLocation(selectionRectProgram, 'u_projectionMatrix')!,
+        u_time: gl.getUniformLocation(selectionRectProgram, 'u_time')!
+      }
+    };
   }
 
   /**
@@ -159,6 +190,30 @@ export class WebGLRenderer {
     });
 
     resizeObserver.observe(canvas);
+  }
+
+  /**
+   * Setup selection synchronization with SelectionManager
+   */
+  private setupSelectionSync(): void {
+    selectionManager.subscribe((selectionState) => {
+      this.selectedIds = selectionState.selectedIds;
+      // Trigger a re-render to update selection highlighting
+      this.requestRender();
+    });
+  }
+
+  /**
+   * Request a render on the next frame
+   */
+  private requestRender(): void {
+    if (this.lastGraph) {
+      requestAnimationFrame(() => {
+        if (this.lastGraph) {
+          this.render(this.lastGraph);
+        }
+      });
+    }
   }
 
   /**
@@ -183,13 +238,21 @@ export class WebGLRenderer {
    * Render the graph
    */
   render(graph: Graph): void {
+    this.lastGraph = graph;
     const startTime = performance.now();
     const gl = this.gl;
 
+    // Update camera animation
+    const currentTime = performance.now();
+    const isAnimating = this.camera.updateAnimation(currentTime);
+    
+    // Continue animating if needed
+    if (isAnimating) {
+      this.requestRender();
+    }
 
     // Clear canvas
     gl.clear(gl.COLOR_BUFFER_BIT);
-
 
     // Reset stats
     this.stats.drawCalls = 0;
@@ -198,7 +261,7 @@ export class WebGLRenderer {
     this.stats.visibleEdges = graph.edges.length;
 
     // Update time uniform
-    const currentTime = (Date.now() - this.startTime) / 1000.0;
+    const currentTimeShader = (Date.now() - this.startTime) / 1000.0;
 
     // Get camera matrices
     const viewMatrix = this.camera.getViewMatrix();
@@ -207,13 +270,18 @@ export class WebGLRenderer {
     
 
     // Render boundaries first (background)
-    this.renderBoundaries(graph.boundaries, viewMatrix, projectionMatrix, currentTime);
+    this.renderBoundaries(graph.boundaries, viewMatrix, projectionMatrix, currentTimeShader);
 
     // Render edges
-    this.renderEdges(graph.edges, graph.nodes, viewMatrix, projectionMatrix, currentTime);
+    this.renderEdges(graph.edges, graph.nodes, viewMatrix, projectionMatrix, currentTimeShader);
 
     // Render nodes (foreground)
-    this.renderNodes(graph.nodes, viewMatrix, projectionMatrix, currentTime);
+    this.renderNodes(graph.nodes, viewMatrix, projectionMatrix, currentTimeShader);
+
+    // Render selection rectangle (if active) on top of everything but below text
+    if (this.selectionRect.isActive) {
+      this.renderSelectionRectangle(viewMatrix, projectionMatrix, currentTimeShader);
+    }
 
     // Render text labels on top of everything
     this.textRenderer.renderEntityLabels(graph.nodes, graph.edges, graph.boundaries, this.selectedIds);
@@ -438,6 +506,68 @@ export class WebGLRenderer {
   }
 
   /**
+   * Render selection rectangle
+   */
+  private renderSelectionRectangle(viewMatrix: Float32Array, projectionMatrix: Float32Array, time: number): void {
+    if (!this.selectionRectProgram) return;
+
+    const gl = this.gl;
+    const program = this.selectionRectProgram;
+
+    gl.useProgram(program.program);
+
+    // Set uniforms
+    gl.uniformMatrix3fv(program.uniforms.u_viewMatrix, false, viewMatrix);
+    gl.uniformMatrix3fv(program.uniforms.u_projectionMatrix, false, projectionMatrix);
+    gl.uniform1f(program.uniforms.u_time, time);
+
+    // Generate selection rectangle instance data
+    const instanceData = this.bufferManager.generateSelectionRectInstanceData(
+      this.selectionRect.startX,
+      this.selectionRect.startY,
+      this.selectionRect.endX,
+      this.selectionRect.endY
+    );
+
+    // Set up vertex buffer
+    const positionBuffer = this.bufferManager.createBuffer(
+      'selectionRectPosition',
+      this.bufferManager.getSelectionRectGeometry(),
+      2
+    );
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer.buffer);
+    if (program.attributes.a_position >= 0) {
+      gl.enableVertexAttribArray(program.attributes.a_position);
+      gl.vertexAttribPointer(program.attributes.a_position, 2, gl.FLOAT, false, 0, 0);
+    }
+
+    // Set up instance data
+    const instanceBuffer = this.bufferManager.createBuffer('selectionRectInstances', instanceData, 4);
+    gl.bindBuffer(gl.ARRAY_BUFFER, instanceBuffer.buffer);
+
+    // Instance attributes (4 floats per instance = 16 bytes stride)
+    if (program.attributes.a_rectPos >= 0) {
+      gl.enableVertexAttribArray(program.attributes.a_rectPos);
+      gl.vertexAttribPointer(program.attributes.a_rectPos, 2, gl.FLOAT, false, 16, 0);
+      gl.vertexAttribDivisor(program.attributes.a_rectPos, 1);
+    }
+
+    if (program.attributes.a_rectSize >= 0) {
+      gl.enableVertexAttribArray(program.attributes.a_rectSize);
+      gl.vertexAttribPointer(program.attributes.a_rectSize, 2, gl.FLOAT, false, 16, 8);
+      gl.vertexAttribDivisor(program.attributes.a_rectSize, 1);
+    }
+
+    // Draw the selection rectangle
+    gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, 1);
+
+    this.cleanupVertexAttribs(program);
+    this.stats.drawCalls++;
+    this.stats.vertexCount += 4;
+  }
+
+  /**
    * Clean up vertex attribute arrays
    */
   private cleanupVertexAttribs(program: ShaderProgram): void {
@@ -466,6 +596,24 @@ export class WebGLRenderer {
   }
 
   /**
+   * Set selection rectangle coordinates and visibility
+   */
+  setSelectionRectangle(startX: number, startY: number, endX: number, endY: number, isActive: boolean): void {
+    this.selectionRect.startX = startX;
+    this.selectionRect.startY = startY;
+    this.selectionRect.endX = endX;
+    this.selectionRect.endY = endY;
+    this.selectionRect.isActive = isActive;
+  }
+
+  /**
+   * Clear selection rectangle
+   */
+  clearSelectionRectangle(): void {
+    this.selectionRect.isActive = false;
+  }
+
+  /**
    * Get rendering statistics
    */
   getStats(): RenderStats {
@@ -482,6 +630,7 @@ export class WebGLRenderer {
     if (this.nodeProgram) gl.deleteProgram(this.nodeProgram.program);
     if (this.edgeProgram) gl.deleteProgram(this.edgeProgram.program);
     if (this.boundaryProgram) gl.deleteProgram(this.boundaryProgram.program);
+    if (this.selectionRectProgram) gl.deleteProgram(this.selectionRectProgram.program);
 
     // Clean up buffers
     this.bufferManager.dispose();

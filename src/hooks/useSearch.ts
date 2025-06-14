@@ -6,6 +6,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Graph } from '../core/types/graph';
 import { SearchEngine, SearchResult, SearchOptions } from '../core/search/SearchEngine';
+import { SimpleSearchEngine, SimpleSearchResult } from '../core/search/SimpleSearchEngine';
 import { FilterEngine, FilterOptions, FilteredGraph } from '../core/search/FilterEngine';
 
 export interface UseSearchOptions {
@@ -13,6 +14,7 @@ export interface UseSearchOptions {
   maxResults?: number;
   enableFilters?: boolean;
   enableHistory?: boolean;
+  useSimpleSearch?: boolean; // Use fast search by default
 }
 
 export interface UseSearchResult {
@@ -62,10 +64,11 @@ export const useSearch = (
   options: UseSearchOptions = {}
 ): UseSearchResult => {
   const {
-    debounceMs = 300,
-    maxResults = 100,
-    enableFilters = true,
-    enableHistory = true
+    debounceMs = 50, // Even faster debouncing for simple search
+    maxResults = 10,  // Even fewer results for better performance
+    enableFilters = false, // Disable filters by default for performance
+    enableHistory = true,
+    useSimpleSearch = true // Use simple search by default
   } = options;
 
   // Search state
@@ -93,11 +96,23 @@ export const useSearch = (
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
   const filterTimeoutRef = useRef<NodeJS.Timeout>();
   const searchEngineRef = useRef<SearchEngine | null>(null);
+  const simpleSearchEngineRef = useRef<SimpleSearchEngine | null>(null);
+  
+  // Cache for search results
+  const searchCacheRef = useRef<Map<string, SearchResult[]>>(new Map());
+  const lastQueryRef = useRef<string>('');
 
-  // Initialize/update search engine when graph changes
+  // Initialize/update search engines when graph changes
   useEffect(() => {
-    searchEngineRef.current = new SearchEngine(graph);
-  }, [graph]);
+    if (useSimpleSearch) {
+      simpleSearchEngineRef.current = new SimpleSearchEngine(graph);
+    } else {
+      searchEngineRef.current = new SearchEngine(graph);
+    }
+    
+    // Clear cache when graph changes
+    searchCacheRef.current.clear();
+  }, [graph, useSimpleSearch]);
 
   // Debounced search function
   const debouncedSearch = useCallback((searchQuery: string, searchOptions?: Partial<SearchOptions>) => {
@@ -107,24 +122,61 @@ export const useSearch = (
 
     setIsSearching(true);
 
-    searchTimeoutRef.current = setTimeout(() => {
-      if (!searchEngineRef.current) {
-        setIsSearching(false);
-        return;
-      }
+    // Use minimal delay for all searches when using simple search
+    const delay = useSimpleSearch ? 10 : debounceMs;
 
+    searchTimeoutRef.current = setTimeout(() => {
       const startTime = performance.now();
       
       try {
-        const searchResults = searchQuery.trim() 
-          ? searchEngineRef.current.search({
+        let searchResults: SearchResult[] = [];
+        const trimmedQuery = searchQuery.trim().toLowerCase();
+        
+        // Check cache first for simple searches
+        if (useSimpleSearch && searchCacheRef.current.has(trimmedQuery)) {
+          searchResults = searchCacheRef.current.get(trimmedQuery)!;
+          setResults(searchResults);
+          setSearchTime(performance.now() - startTime);
+          setIsSearching(false);
+          return;
+        }
+
+        if (searchQuery.trim()) {
+          if (useSimpleSearch && simpleSearchEngineRef.current) {
+            // Use fast simple search
+            const simpleResults = simpleSearchEngineRef.current.search({
+              query: searchQuery,
+              maxResults
+            });
+            
+            // Convert SimpleSearchResult to SearchResult format
+            searchResults = simpleResults.map((result, index) => ({
+              entity: result.entity,
+              score: result.relevance,
+              matches: [{
+                field: 'name',
+                value: 'name' in result.entity ? result.entity.name : `${(result.entity as any).source} → ${(result.entity as any).targets?.join(', ')}`,
+                indices: [[0, 0]] as [number, number][],
+                matchType: result.matchType as 'exact' | 'fuzzy' | 'partial'
+              }],
+              rank: index + 1
+            }));
+            
+            // Cache results for simple searches
+            if (searchResults.length > 0 && searchCacheRef.current.size < 50) { // Limit cache size
+              searchCacheRef.current.set(trimmedQuery, searchResults);
+            }
+          } else if (searchEngineRef.current) {
+            // Use advanced search engine
+            searchResults = searchEngineRef.current.search({
               query: searchQuery,
               maxResults,
               fuzzyMatch: true,
               searchFields: ['name', 'properties', 'type'],
               ...searchOptions
-            })
-          : [];
+            });
+          }
+        }
 
         setResults(searchResults);
         setSearchTime(performance.now() - startTime);
@@ -139,8 +191,8 @@ export const useSearch = (
       } finally {
         setIsSearching(false);
       }
-    }, debounceMs);
-  }, [debounceMs, maxResults, enableHistory, searchHistory]);
+    }, delay);
+  }, [debounceMs, maxResults, enableHistory, searchHistory, useSimpleSearch]);
 
   // Debounced filter function
   const debouncedFilter = useCallback(() => {

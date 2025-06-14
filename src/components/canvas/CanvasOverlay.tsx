@@ -4,9 +4,10 @@
 
 import React from 'react';
 import { CanvasMode } from '@/core/types';
+import { SelectionState } from '@/core/graph/SelectionManager';
 
 export interface CanvasOverlayProps {
-  selection: string[];
+  selection: SelectionState;
   hoveredId: string | null;
   hoveredEdgeId: string | null;
   hoveredBoundaryId: string | null;

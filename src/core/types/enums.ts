@@ -26,3 +26,5 @@ export enum CanvasMode {
   DRAW_EDGE = 'draw-edge',
   DRAW_BOUNDARY = 'draw-boundary'
 }
+
+export type EntityType = 'node' | 'edge' | 'boundary';

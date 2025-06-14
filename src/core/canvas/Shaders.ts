@@ -106,25 +106,11 @@ export const nodeShaders: ShaderSource = {
       // Anti-aliasing
       alpha = 1.0 - smoothstep(-0.02, 0.02, dist);
       
-      // Selection border (enhanced from original glow)
+      // Selection highlight (simplified to match working edge/boundary approach)
       if (v_selected > 0.5) {
-        // Create a clear border outline
-        float borderOuter = 1.0 - smoothstep(-0.12, -0.10, dist);
-        float borderInner = 1.0 - smoothstep(-0.02, 0.02, dist);
-        float borderRing = borderOuter - borderInner;
-        
-        // Animate selection
-        float pulse = sin(u_time * 4.0) * 0.2 + 0.8;
-        
-        // Render border ring
-        if (borderRing > 0.0) {
-          gl_FragColor = vec4(0.067, 0.725, 0.506, borderRing * pulse); // emerald-500 border
-          return;
-        }
-        
-        // Also enhance the original glow for backup visibility
-        float selectionGlow = 1.0 - smoothstep(-0.05, -0.02, dist);
-        alpha = max(alpha, selectionGlow * 0.3);
+        float pulse = sin(u_time * 4.0) * 0.3 + 0.7;
+        gl_FragColor = vec4(0.314, 0.784, 0.471, alpha * pulse); // emerald green
+        return;
       }
 
       gl_FragColor = vec4(v_color, alpha);
@@ -195,7 +181,7 @@ export const edgeShaders: ShaderSource = {
       // Selection highlight
       if (v_selected > 0.5) {
         float pulse = sin(u_time * 4.0) * 0.3 + 0.7;
-        gl_FragColor = vec4(0.067, 0.725, 0.506, alpha * pulse); // emerald-500
+        gl_FragColor = vec4(0.314, 0.784, 0.471, alpha * pulse); // emerald green
       } else {
         gl_FragColor = vec4(v_color, alpha);
       }
@@ -270,12 +256,85 @@ export const boundaryShaders: ShaderSource = {
       if (v_selected > 0.5) {
         float pulse = sin(u_time * 4.0) * 0.3 + 0.7;
         alpha *= pulse;
-        gl_FragColor = vec4(0.067, 0.725, 0.506, alpha); // emerald-500
+        gl_FragColor = vec4(0.314, 0.784, 0.471, alpha); // emerald green
       } else {
         gl_FragColor = vec4(v_color, alpha);
       }
       
       if (alpha < 0.01) {
+        discard;
+      }
+    }
+  `
+};
+
+/**
+ * Selection rectangle rendering shaders for multi-select operations
+ */
+export const selectionRectShaders: ShaderSource = {
+  vertex: `
+    attribute vec2 a_position;
+    attribute vec2 a_rectPos;
+    attribute vec2 a_rectSize;
+
+    uniform mat3 u_viewMatrix;
+    uniform mat3 u_projectionMatrix;
+
+    varying vec2 v_localPos;
+    varying vec2 v_rectSize;
+
+    void main() {
+      v_localPos = a_position;
+      v_rectSize = a_rectSize;
+      
+      // Position within selection rectangle
+      vec2 worldPos = a_rectPos + a_position * a_rectSize;
+      
+      // Apply camera transforms
+      vec3 viewPos = u_viewMatrix * vec3(worldPos, 1.0);
+      vec3 clipPos = u_projectionMatrix * viewPos;
+      
+      gl_Position = vec4(clipPos.xy, 0.0, 1.0);
+    }
+  `,
+  fragment: `
+    precision highp float;
+
+    varying vec2 v_localPos;
+    varying vec2 v_rectSize;
+
+    uniform float u_time;
+
+    void main() {
+      // Calculate distance from edge for border
+      vec2 border = min(v_localPos, 1.0 - v_localPos);
+      float borderDist = min(border.x, border.y);
+      
+      // Border thickness (adaptive to rectangle size)
+      float borderWidth = max(0.005, min(0.02, min(v_rectSize.x, v_rectSize.y) * 0.01));
+      
+      // Create dashed border effect
+      float dashLength = max(10.0, min(v_rectSize.x, v_rectSize.y) * 0.1);
+      vec2 worldCoord = v_localPos * v_rectSize;
+      float dashPattern = mod((worldCoord.x + worldCoord.y) * 2.0 + u_time * 100.0, dashLength * 2.0);
+      float dash = step(dashLength, dashPattern);
+      
+      // Border alpha with smooth anti-aliasing
+      float borderAlpha = (1.0 - smoothstep(borderWidth - 0.002, borderWidth + 0.002, borderDist)) * dash;
+      
+      // Fill alpha (very subtle)
+      float fillAlpha = 0.05;
+      
+      // Combine border and fill
+      float totalAlpha = max(borderAlpha * 0.8, fillAlpha);
+      
+      // Animated selection color (blue-500 with some transparency)
+      float pulse = sin(u_time * 3.0) * 0.2 + 0.8;
+      vec3 selectionColor = vec3(0.239, 0.525, 0.976); // blue-500
+      
+      gl_FragColor = vec4(selectionColor, totalAlpha * pulse);
+      
+      if (totalAlpha < 0.01) {
         discard;
       }
     }

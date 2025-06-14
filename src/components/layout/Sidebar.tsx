@@ -3,12 +3,11 @@ import { Button } from '../ui/Button';
 import PropertiesPanel from '../properties/PropertiesPanel';
 import { Node, Edge, Boundary } from '../../types/placeholder';
 import { Graph } from '../../core/types/graph';
+import { SelectionState } from '../../core/graph/SelectionManager';
 import '../../styles/components/sidebar.css';
 
 interface SidebarProps {
-  selectedNodes: string[];
-  selectedEdges: string[];
-  selectedBoundaries: string[];
+  selection: SelectionState;
   graph: Graph | null;
   onUpdateNode: (id: string, updates: Partial<Node>) => void;
   onUpdateEdge: (id: string, updates: Partial<Edge>) => void;
@@ -41,16 +40,14 @@ const convertGraphToRecords = (graph: Graph | null) => {
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
-  selectedNodes, 
-  selectedEdges, 
-  selectedBoundaries, 
+  selection, 
   graph,
   onUpdateNode,
   onUpdateEdge,
   onUpdateBoundary
 }) => {
   // Combine all selections into a single array for PropertiesPanel
-  const allSelected = [...selectedNodes, ...selectedEdges, ...selectedBoundaries];
+  const allSelected = [...selection.selectedNodes, ...selection.selectedEdges, ...selection.selectedBoundaries];
   const graphRecords = convertGraphToRecords(graph);
 
   return (

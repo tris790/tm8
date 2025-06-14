@@ -1,0 +1,171 @@
+Coordinate System:
+
+    Origin (0, 0): The top-left corner of the grid.
+
+    Units: Each square in the grid is considered one unit.
+
+    Positions: For shapes, the position is given as (X, Y) coordinates for the top-left corner (for squares) or the center (for circles). Dimensions are given in grid units.
+
+1. Processes and Actors
+
+    TD Generic Process
+
+        Type: Circle
+
+        Center Coordinates: (X: 4.5, Y: 4.5)
+
+        Diameter: 4 units
+
+    TD OS Process
+
+        Type: Circle
+
+        Center Coordinates: (X: 13.5, Y: 4.5)
+
+        Diameter: 4 units
+
+    TD Human User
+
+        Type: Square
+
+        Top-Left Coordinates: (X: 2, Y: 10)
+
+        Size (Width x Height): 5 x 5 units
+
+2. Data Stores
+
+    TD Generic Data Store
+
+        Type: Square
+
+        Top-Left Coordinates: (X: 2, Y: 19)
+
+        Size (W x H): 5 x 5 units
+
+    TD Cloud Storage
+
+        Type: Square
+
+        Top-Left Coordinates: (X: 11, Y: 19)
+
+        Size (W x H): 5 x 5 units
+
+    TD SQL Database
+
+        Type: Square
+
+        Top-Left Coordinates: (X: 20, Y: 19)
+
+        Size (W x H): 5 x 5 units
+
+    TD File System
+
+        Type: Square
+
+        Top-Left Coordinates: (X: 29, Y: 19)
+
+        Size (W x H): 5 x 5 units
+
+3. Data Flow Stencils
+
+These are the template elements for data flows, consisting of a label box and a sample line.
+
+    TD Generic Data Flow
+
+        Label Box Top-Left: (X: 2, Y: 28)
+
+        Label Box Size (W x H): 8 x 2 units
+
+        Line Start: (X: 10, Y: 28)
+
+        Line End (with arrowhead): (X: 2, Y: 30)
+
+    TD HTTP
+
+        Label Box Top-Left: (X: 13, Y: 28)
+
+        Label Box Size (W x H): 5 x 2 units
+
+        Line Start: (X: 18, Y: 28)
+
+        Line End (with arrowhead): (X: 13, Y: 30)
+
+    TD HTTPS
+
+        Label Box Top-Left: (X: 22, Y: 28)
+
+        Label Box Size (W x H): 6 x 2 units
+
+        Line Start: (X: 28, Y: 28)
+
+        Line End (with arrowhead): (X: 22, Y: 30)
+
+4. Trust Boundary Stencils
+
+    TD Generic Trust Line Boundary
+
+        Style: Red, dashed line
+
+        Label Box Top-Left: (X: 2, Y: 35)
+
+        Label Box Size (W x H): 11 x 2 units
+
+        Line Start: (X: 1.5, Y: 34.5)
+
+        Line End: (X: 6.5, Y: 32.5)
+
+    TD Internet Boundary
+
+        Style: Red, dashed line
+
+        Label Box Top-Left: (X: 16, Y: 35)
+
+        Label Box Size (W x H): 9 x 2 units
+
+        Line Start: (X: 15.5, Y: 34.5)
+
+        Line End: (X: 20.5, Y: 32.5)
+
+    TD Generic Trust Border Boundary
+
+        Type: Rectangle
+
+        Style: Red, dashed line
+
+        Top-Left Coordinates: (X: 2, Y: 39)
+
+        Size (W x H): 14 x 6 units
+
+        Internal Label Position: Text starts near (X: 3, Y: 40)
+
+5. Example Diagram
+
+This section details the example at the bottom of the image.
+
+    TD Service1
+
+        Type: Circle
+
+        Center Coordinates: (X: 6, Y: 51)
+
+        Diameter: 5 units
+
+    TD Service2
+
+        Type: Circle
+
+        Center Coordinates: (X: 24, Y: 51)
+
+        Diameter: 5 units
+
+    Data Flow (Connector)
+
+        Type: Labeled line with an arrowhead
+
+        Line Start: From the right edge of TD Service1 at (X: 8.5, Y: 51)
+
+        Line End: To the left edge of TD Service2 at (X: 21.5, Y: 51)
+
+        Label Box ("TD HTTP") Top-Left: (X: 11, Y: 50)
+
+        Label Box Size (W x H): 5 x 2 units

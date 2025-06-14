@@ -17,6 +17,7 @@ export interface SearchBarProps {
   autoFocus?: boolean;
   showShortcuts?: boolean;
   className?: string;
+  isSearching?: boolean; // Let parent control search state
 }
 
 /**
@@ -32,35 +33,22 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   disabled = false,
   autoFocus = false,
   showShortcuts = true,
-  className = ""
+  className = "",
+  isSearching = false
 }) => {
   const [internalValue, setInternalValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Use controlled value if provided, otherwise use internal state
   const value = controlledValue !== undefined ? controlledValue : internalValue;
-
-  // Debounced search function
-  const debouncedSearch = useCallback((query: string) => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-
-    setIsSearching(true);
-    searchTimeoutRef.current = setTimeout(() => {
-      onSearch(query);
-      setIsSearching(false);
-    }, 300);
-  }, [onSearch]);
 
   const handleChange = (newValue: string) => {
     if (controlledValue === undefined) {
       setInternalValue(newValue);
     }
-    debouncedSearch(newValue);
+    // Remove double debouncing - let useSearch handle debouncing
+    onSearch(newValue);
   };
 
   const handleClear = () => {
@@ -119,6 +107,20 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     };
   }, []);
 
+  // Click outside handler to remove focus
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (inputRef.current && !inputRef.current.contains(e.target as Node) && isFocused) {
+        inputRef.current.blur();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isFocused]);
+
   // Auto-focus if requested
   useEffect(() => {
     if (autoFocus && inputRef.current) {
@@ -126,14 +128,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, [autoFocus]);
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, []);
 
   return (
     <div className={`search-bar ${isFocused ? 'focused' : ''} ${className}`}>
@@ -231,14 +225,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         )}
       </div>
 
-      {/* Keyboard Shortcuts Hint */}
-      {showShortcuts && !isFocused && !value && (
-        <div className="search-shortcuts">
-          <span className="shortcut-hint">
-            Press <kbd>Ctrl</kbd>+<kbd>F</kbd> to search
-          </span>
-        </div>
-      )}
 
       {/* Search Status */}
       {isFocused && (
