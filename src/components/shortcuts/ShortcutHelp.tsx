@@ -24,28 +24,21 @@ export interface ShortcutHelpProps {
 
 const defaultShortcuts: ShortcutCategory[] = [
   {
-    category: 'General',
-    items: [
-      { key: 'Ctrl+O', description: 'Open file' },
-      { key: 'Ctrl+S', description: 'Save file' },
-      { key: 'Ctrl+Shift+S', description: 'Save as...' },
-      { key: 'Ctrl+E', description: 'Export' },
-      { key: 'Ctrl+F', description: 'Focus search' },
-      { key: 'Ctrl+,', description: 'Open preferences' },
-      { key: '?', description: 'Show this help' },
-    ]
-  },
-  {
     category: 'Tools',
     items: [
       { key: 'V', description: 'Select tool' },
       { key: 'H', description: 'Pan tool' },
+      { key: 'L', description: 'Add data flow' },
+      { key: 'B', description: 'Add boundary' },
+    ]
+  },
+  {
+    category: 'Create Nodes',
+    items: [
       { key: 'P', description: 'Add process' },
       { key: 'D', description: 'Add data store' },
       { key: 'E', description: 'Add external entity' },
       { key: 'S', description: 'Add service' },
-      { key: 'B', description: 'Add boundary' },
-      { key: 'L', description: 'Add data flow' },
     ]
   },
   {
@@ -57,33 +50,13 @@ const defaultShortcuts: ShortcutCategory[] = [
       { key: 'Ctrl+Y', description: 'Redo' },
       { key: 'Ctrl+Shift+Z', description: 'Redo' },
       { key: 'Ctrl+A', description: 'Select all' },
-      { key: 'Escape', description: 'Clear selection' },
-      { key: 'Ctrl+D', description: 'Duplicate selected' },
       { key: 'Ctrl+G', description: 'Group selected' },
     ]
   },
   {
-    category: 'Navigation',
+    category: 'Help',
     items: [
-      { key: 'Space+Drag', description: 'Pan canvas' },
-      { key: 'Mouse Wheel', description: 'Zoom in/out' },
-      { key: 'Ctrl+Mouse Wheel', description: 'Fine zoom' },
-      { key: 'Ctrl+0', description: 'Fit to screen' },
-      { key: 'Ctrl+1', description: 'Zoom to 100%' },
-      { key: 'Ctrl++', description: 'Zoom in' },
-      { key: 'Ctrl+-', description: 'Zoom out' },
-    ]
-  },
-  {
-    category: 'View',
-    items: [
-      { key: 'Ctrl+1', description: 'Show nodes only' },
-      { key: 'Ctrl+2', description: 'Show edges only' },
-      { key: 'Ctrl+3', description: 'Show boundaries only' },
-      { key: 'Ctrl+4', description: 'Show all' },
-      { key: 'Tab', description: 'Toggle properties panel' },
-      { key: 'Shift+Tab', description: 'Toggle toolbar' },
-      { key: 'F11', description: 'Toggle fullscreen' },
+      { key: '?', description: 'Show this help' },
     ]
   }
 ];

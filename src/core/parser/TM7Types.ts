@@ -155,7 +155,7 @@ export function extractTM7Properties(properties: any): TM7PropertyMap {
  * Default TM7 XML template structure
  */
 export const TM7_XML_TEMPLATE = `<?xml version="1.0" encoding="utf-8"?>
-<ThreatModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.microsoft.com/2003/10/Serialization/">
+<ThreatModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/2003/10/Serialization/">
   <DrawingSurfaceList>
     <DrawingSurfaceModel>
       <GenericTypeId>00000000-0000-0000-0000-000000000000</GenericTypeId>

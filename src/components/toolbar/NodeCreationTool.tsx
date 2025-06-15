@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CanvasMode, NodeType } from '../../types/placeholder';
 import { ToolButton } from './ToolButton';
 
@@ -16,6 +16,23 @@ export const NodeCreationTool: React.FC<NodeCreationToolProps> = ({
   activeNodeType
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
   
   const nodeTypes = [
     { 
@@ -80,7 +97,7 @@ export const NodeCreationTool: React.FC<NodeCreationToolProps> = ({
   };
 
   return (
-    <div className="node-creation-tool">
+    <div className="node-creation-tool" ref={dropdownRef}>
       <div className="node-creation-tool__main">
         <ToolButton 
           mode={CanvasMode.DRAW_NODE}

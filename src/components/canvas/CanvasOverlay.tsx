@@ -110,29 +110,30 @@ const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
             <div className="help-icon">?</div>
             <div className="help-tooltip">
               <div className="instruction-group">
-                <h4>Navigation:</h4>
-                <ul>
-                  <li><kbd>Mouse Wheel</kbd> - Zoom</li>
-                  <li><kbd>Middle Click + Drag</kbd> - Pan</li>
-                  <li><kbd>Space + Drag</kbd> - Pan</li>
-                </ul>
-              </div>
-              <div className="instruction-group">
-                <h4>Selection:</h4>
-                <ul>
-                  <li><kbd>Click</kbd> - Select</li>
-                  <li><kbd>Ctrl + Click</kbd> - Multi-select</li>
-                  <li><kbd>Ctrl + A</kbd> - Select All</li>
-                  <li><kbd>Esc</kbd> - Clear Selection</li>
-                </ul>
-              </div>
-              <div className="instruction-group">
                 <h4>Tools:</h4>
                 <ul>
                   <li><kbd>V</kbd> - Select Mode</li>
-                  <li><kbd>N</kbd> - Node Tool</li>
-                  <li><kbd>E</kbd> - Edge Tool</li>
+                  <li><kbd>H</kbd> - Pan Mode</li>
+                  <li><kbd>L</kbd> - Data Flow Tool</li>
                   <li><kbd>B</kbd> - Boundary Tool</li>
+                </ul>
+              </div>
+              <div className="instruction-group">
+                <h4>Create Nodes:</h4>
+                <ul>
+                  <li><kbd>P</kbd> - Add Process</li>
+                  <li><kbd>D</kbd> - Add Data Store</li>
+                  <li><kbd>E</kbd> - Add External Entity</li>
+                  <li><kbd>S</kbd> - Add Service</li>
+                </ul>
+              </div>
+              <div className="instruction-group">
+                <h4>Editing:</h4>
+                <ul>
+                  <li><kbd>Delete</kbd> - Delete Selected</li>
+                  <li><kbd>Ctrl + Z</kbd> - Undo</li>
+                  <li><kbd>Ctrl + Y</kbd> - Redo</li>
+                  <li><kbd>Ctrl + A</kbd> - Select All</li>
                 </ul>
               </div>
             </div>
