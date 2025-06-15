@@ -189,11 +189,11 @@ input, textarea, select {
   letter-spacing: 0.5px;
 }
 
-.mode-select { color: var(--color-primary); }
-.mode-pan { color: #f59e0b; }
-.mode-draw-node { color: #10b981; }
-.mode-draw-edge { color: #8b5cf6; }
-.mode-draw-boundary { color: #f97316; }
+.mode-select { color: #10b981; }
+.mode-pan { color: #8b5cf6; }
+.mode-draw-node { color: var(--color-primary); }
+.mode-draw-edge { color: #FF9F00; }
+.mode-draw-boundary { color: #CB0404; }
 
 .selection-info {
   position: absolute;

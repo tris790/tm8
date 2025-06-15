@@ -58,10 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="header-left">
         <div className="logo-section">
           <div className="logo">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <rect width="32" height="32" rx="8" fill="var(--color-primary)"/>
-              <path d="M8 12h16M8 16h16M8 20h12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
+            <img src="/assets/Tm8Logo.png" alt="TM8 Logo" width="32" height="32" />
           </div>
           <h1 className="app-title">Threat Modeler</h1>
         </div>

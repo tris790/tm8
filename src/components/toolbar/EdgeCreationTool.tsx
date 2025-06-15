@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CanvasMode, EdgeType } from '../../types/placeholder';
 import { ToolButton } from './ToolButton';
 
@@ -16,12 +16,29 @@ export const EdgeCreationTool: React.FC<EdgeCreationToolProps> = ({
   activeEdgeType
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
   
   const edgeTypes = [
     { 
       type: EdgeType.HTTPS, 
       label: 'HTTPS', 
-      shortcut: 'Shift+H',
+      shortcut: undefined,
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -32,7 +49,7 @@ export const EdgeCreationTool: React.FC<EdgeCreationToolProps> = ({
     { 
       type: EdgeType.GRPC, 
       label: 'gRPC', 
-      shortcut: 'Shift+G',
+      shortcut: undefined,
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -61,7 +78,7 @@ export const EdgeCreationTool: React.FC<EdgeCreationToolProps> = ({
   };
 
   return (
-    <div className="edge-creation-tool">
+    <div className="edge-creation-tool" ref={dropdownRef}>
       <div className="edge-creation-tool__main">
         <ToolButton 
           mode={CanvasMode.DRAW_EDGE}
@@ -69,7 +86,7 @@ export const EdgeCreationTool: React.FC<EdgeCreationToolProps> = ({
           onSelect={handleMainButtonClick}
           icon={activeEdgeTypeConfig.icon}
           tooltip={`Add ${activeEdgeTypeConfig.label} Connection`}
-          shortcut={activeEdgeTypeConfig.shortcut}
+          shortcut="L"
         />
         <button 
           className={`edge-creation-tool__dropdown-toggle ${isEdgeDrawingMode ? 'active' : ''}`}

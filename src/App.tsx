@@ -361,6 +361,18 @@ const App: React.FC<AppProps> = () => {
     }
   }, [selection, clearSelection, graph, updateGraph]);
 
+  // Group selected entities (placeholder functionality)
+  const groupSelected = useCallback(() => {
+    if (selection.selectedIds.size > 1) {
+      // TODO: Implement grouping functionality
+      window.showNotification?.({ 
+        type: 'info', 
+        title: 'Group selected',
+        message: `Grouping ${selection.selectedIds.size} items (not yet implemented)`
+      });
+    }
+  }, [selection.selectedIds]);
+
   // Keyboard shortcuts
   const shortcutHandlers = {
     setMode: (mode: string) => {
@@ -370,7 +382,8 @@ const App: React.FC<AppProps> = () => {
     deleteSelected,
     undo,
     redo,
-    selectAll
+    selectAll,
+    groupSelected
   };
 
   const shortcuts = [
